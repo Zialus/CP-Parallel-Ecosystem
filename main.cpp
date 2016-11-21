@@ -29,31 +29,40 @@ struct Fox {
     int pos_y;
 };
 
-void printMatrix(char** matrix,int R,int C) {
 
-//    int i, j, ct = 0;
-//    for (i = 0; i < R; i++)
-//        for (j = 0; j < C; j++)
-//            if (matrix[i][j] == RABBIT_ID)
-//                ct++;
-//            else if (matrix[i][j] == FOX_ID)
-//                ct++;
-//            else if (matrix[i][j] == ROCK_ID)
-//                ct++;
-//
-//    printf("%d %d %d %d %d %d %d\n", GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES, 0, R, C, ct);
+void printFinalResults(char** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES){
+
+    int counter = 0;
 
     for (int i = 0; i < R; i++) {
-        for (int j = 0; j < C; j++){
-            if (matrix[i][j] == 'R')
-                printf("RABBIT %d %d\n", i, j);
-            else if (matrix[i][j] == 'F')
-                printf("FOX %d %d\n", i, j);
-            else if (matrix[i][j] == '*')
-                printf("ROCK %d %d\n", i, j);
+        for (int j = 0; j < C; j++) {
+            if (matrix[i][j] == 'R') {
+                counter++;
+            } else if (matrix[i][j] == 'F') {
+                counter++;
+            } else if (matrix[i][j] == '*') {
+                counter++;
+            }
         }
     }
 
+    printf("%d %d %d %d %d %d %d\n", GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES, 0, R, C, counter);
+
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++){
+            if (matrix[i][j] == 'R') {
+                printf("RABBIT %d %d\n", i, j);
+            } else if (matrix[i][j] == 'F') {
+                printf("FOX %d %d\n", i, j);
+            } else if (matrix[i][j] == '*') {
+                printf("ROCK %d %d\n", i, j);
+            }
+        }
+    }
+
+}
+
+void printMatrix(char** matrix, int R, int C) {
 
     for (int i = 0; i < R+2; ++i) {
         printf("-");
@@ -132,7 +141,9 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    printMatrix(posMatrix,R,C);
+    printMatrix(posMatrix, R, C);
+
+    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
     return 0;
 }
