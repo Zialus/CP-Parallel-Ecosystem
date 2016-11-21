@@ -1,0 +1,13 @@
+language: cpp
+sudo: required
+dist: trusty
+osx_image: xcode8.2
+os:
+  - linux
+  - osx
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. && make
+  - ctest
