@@ -3,32 +3,45 @@
 
 using namespace std;
 
+char** posMatrix;
+int** ageMatrix;
+int** hungryMatrix;
+
+int GEN_PROC_RABBITS ; // number of generations until a rabbit can procreate
+int GEN_PROC_FOXES ; // number of generations until a fox can procreate
+int GEN_FOOD_FOXES ; // number of generations for a fox to die of starvation
+int N_GEN ; // number of generations for the simulation
+int R ; // number of rows of the matrix representing the ecosystem
+int C ; // number of columns of the matrix representing the ecosystem
+int N ; // number of objects in the initial ecosystem
+
 struct Rabbit {
 
-    Rabbit(int a, int x, int y) {
-        age = a;
+    Rabbit(int x, int y) {
+        procAge = 0;
         pos_x = x;
         pos_y = y;
     }
 
-    int age;
+    int procAge;
     int pos_x;
     int pos_y;
 };
 
 struct Fox {
 
-    Fox(int a, int x, int y) {
-        age = a;
+    Fox(int x, int y) {
+        hungryAge = 0;
+        procAge = 0;
         pos_x = x;
         pos_y = y;
     }
 
-    int age;
+    int hungryAge;
+    int procAge;
     int pos_x;
     int pos_y;
 };
-
 
 void printFinalResults(char** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES){
 
@@ -84,18 +97,74 @@ void printMatrix(char** matrix, int R, int C) {
 
 }
 
+void simGen(){
+
+
+}
+
+
+vector<char> checkAdjacencies(int X, int Y){
+    vector<char> validPositions;
+    char n = posMatrix[X-1][Y]; // NORTH
+    if (n == ' ') {
+        validPositions.push_back(n);
+    };
+    char w = posMatrix[X][Y-1]; // WEST
+    if (w == ' ') {
+        validPositions.push_back(n);
+    };
+    char s = posMatrix[X+1][Y]; // SOUTH
+    if (s == ' ') {
+        validPositions.push_back(n);
+    };
+    char e = posMatrix[X][Y+1]; // EAST
+    if (e == ' ') {
+        validPositions.push_back(n);
+    };
+    return validPositions;
+};
+
+pair<int,int> chooseMovePosition(int currentGen, int xPos, int yPos, vector<char> posVal){
+    int pos = (int) ((currentGen + xPos + yPos) % posVal.size());
+
+    if(posVal[pos] == 'N'){
+        pair<int, int> posPair = make_pair(xPos-1,yPos);
+        return posPair;
+    }
+
+    else if(posVal[pos] == 'E'){
+        pair<int, int> posPair = make_pair (xPos,yPos+1);
+        return posPair;
+    }
+
+    else if(posVal[pos] == 'S'){
+        pair<int, int> posPair = make_pair (xPos+1,yPos);
+        return posPair;
+    }
+
+    else if(posVal[pos] == 'W'){
+        pair<int, int> posPair = make_pair (xPos,yPos-1);
+        return posPair;
+    }
+
+    return NULL;
+};
+
+void analyzeRabbits(vector<Rabbit> rabbitList, int currentGen){
+    while(!rabbitList.empty()){
+        Rabbit r = rabbitList.front();
+        rabbitList.erase(rabbitList.begin());
+        int x = r.pos_x;
+        int y = r.pos_y;
+        vector<char> validPositions = checkAdjacencies(x,y);
+        chooseMovePosition(currentGen,x,y,validPositions);
+    }
+}
+
 int main(int argc, char* argv[]) {
 
     vector<Rabbit> RabbitsList;
     vector<Fox> FoxesList;
-
-    int GEN_PROC_RABBITS ; // number of generations until a rabbit can procreate
-    int GEN_PROC_FOXES ; // number of generations until a fox can procreate
-    int GEN_FOOD_FOXES ; // number of generations for a fox to die of starvation
-    int N_GEN ; // number of generations for the simulation
-    int R ; // number of rows of the matrix representing the ecosystem
-    int C ; // number of columns of the matrix representing the ecosystem
-    int N ; // number of objects in the initial ecosystem
 
     if (argc == 2){
         freopen(argv[1], "r", stdin);
@@ -103,7 +172,7 @@ int main(int argc, char* argv[]) {
 
     cin >> GEN_PROC_RABBITS >> GEN_PROC_FOXES >> GEN_FOOD_FOXES >> N_GEN >> R >> C >> N;
 
-    char** posMatrix = new char*[R];
+    posMatrix = new char*[R];
 
     for (int i = 0; i < R; ++i) {
         posMatrix[i] = new char[C];
@@ -124,14 +193,17 @@ int main(int argc, char* argv[]) {
         cin >> TYPE >> X >> Y;
 
         if (TYPE == "RABBIT"){
-            Rabbit r = Rabbit(0, X, Y);
+            Rabbit r = Rabbit(X, Y);
             RabbitsList.push_back(r);
             posMatrix[X][Y] = 'R';
+            ageMatrix[X][Y] = r.procAge;
         }
         else if (TYPE == "FOX"){
-            Fox f = Fox(0, X, Y);
+            Fox f = Fox(X, Y);
             FoxesList.push_back(f);
             posMatrix[X][Y] = 'F';
+            ageMatrix[X][Y] = f.procAge;
+            hungryMatrix[X][Y] = f.hungryAge;
         }
         else if (TYPE == "ROCK"){
             posMatrix[X][Y] = '*';
@@ -139,6 +211,10 @@ int main(int argc, char* argv[]) {
         else {
             cout << "YOU FUCKED UP" << endl;
         }
+    }
+
+    for(int i=0; i<N_GEN; i++){
+        simGen();
     }
 
     printMatrix(posMatrix, R, C);
