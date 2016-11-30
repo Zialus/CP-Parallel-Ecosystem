@@ -6,8 +6,8 @@ using namespace std;
 
 char** posMatrix;
 char** posMatrixTemp;
-int** ageMatrix;
-int** hungryMatrix;
+//int** ageMatrix;
+//int** hungryMatrix;
 
 int GEN_PROC_RABBITS ; // number of generations until a rabbit can procreate
 int GEN_PROC_FOXES ; // number of generations until a fox can procreate
@@ -17,10 +17,36 @@ int R ; // number of rows of the matrix representing the ecosystem
 int C ; // number of columns of the matrix representing the ecosystem
 int N ; // number of objects in the initial ecosystem
 
+typedef enum { RABBIT, FOX, ROCK} ElementType;
+
+struct MatrixElement{
+
+    ElementType element_type;
+
+    union {
+        struct Rabbit;
+        struct Fox;
+        struct Rock;
+    } e;
+
+    int ID;
+};
+
+struct Rock {
+
+    Rock(int x,int y){
+        pos_x = x;
+        pos_y = y;
+    }
+
+    int pos_x;
+    int pos_y;
+};
+
 struct Rabbit {
 
-    Rabbit(int age, int x, int y) {
-        procAge = age;
+    Rabbit(int a, int x, int y) {
+        procAge = a;
         pos_x = x;
         pos_y = y;
     }
@@ -32,9 +58,9 @@ struct Rabbit {
 
 struct Fox {
 
-    Fox(int x, int y) {
+    Fox(int a, int x, int y) {
         hungryAge = 0;
-        procAge = 0;
+        procAge = a;
         pos_x = x;
         pos_y = y;
     }
@@ -150,6 +176,9 @@ pair<int,int> chooseMovePosition(int currentGen, int xPos, int yPos, vector<char
         return posPair;
     }
 
+    perror("Function was used improperly");
+    exit(1);
+
 };
 
 void analyzeRabbits(vector<Rabbit> rabbitList, int currentGen){
@@ -190,14 +219,13 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < R; ++i) {
         posMatrix[i] = new char[C];
-        posMatrixTemp = new char*[R];
+        posMatrixTemp[i] = new char[C];
     }
 
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
             posMatrix[i][j] = ' ';
-            posMatrixTemp[i][j] = ' ';
         }
     }
 
@@ -212,14 +240,11 @@ int main(int argc, char* argv[]) {
             Rabbit r = Rabbit(0, X, Y);
             RabbitsList.push_back(r);
             posMatrix[X][Y] = 'R';
-            ageMatrix[X][Y] = r.procAge;
         }
         else if (TYPE == "FOX"){
-            Fox f = Fox(X, Y);
+            Fox f = Fox(0,X,Y);
             FoxesList.push_back(f);
             posMatrix[X][Y] = 'F';
-            ageMatrix[X][Y] = f.procAge;
-            hungryMatrix[X][Y] = f.hungryAge;
         }
         else if (TYPE == "ROCK"){
             posMatrix[X][Y] = '*';
