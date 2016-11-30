@@ -3,9 +3,6 @@ project(cp_rabits_and_foxes)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_C_COMPILER gcc-6)
-set(CMAKE_CXX_COMPILER g++-6)
-
 FIND_PACKAGE(OpenMP REQUIRED)
 
 if(OPENMP_FOUND)

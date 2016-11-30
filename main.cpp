@@ -1,9 +1,11 @@
 #include <iostream>
+#include <utility>
 #include <vector>
 
 using namespace std;
 
 char** posMatrix;
+char** posMatrixTemp;
 int** ageMatrix;
 int** hungryMatrix;
 
@@ -17,8 +19,8 @@ int N ; // number of objects in the initial ecosystem
 
 struct Rabbit {
 
-    Rabbit(int x, int y) {
-        procAge = 0;
+    Rabbit(int age, int x, int y) {
+        procAge = age;
         pos_x = x;
         pos_y = y;
     }
@@ -104,25 +106,26 @@ void simGen(){
 
 
 vector<char> checkAdjacencies(int X, int Y){
-    vector<char> validPositions;
-    char n = posMatrix[X-1][Y]; // NORTH
-    if (n == ' ') {
-        validPositions.push_back(n);
-    };
-    char w = posMatrix[X][Y-1]; // WEST
-    if (w == ' ') {
-        validPositions.push_back(n);
-    };
-    char s = posMatrix[X+1][Y]; // SOUTH
-    if (s == ' ') {
-        validPositions.push_back(n);
-    };
-    char e = posMatrix[X][Y+1]; // EAST
-    if (e == ' ') {
-        validPositions.push_back(n);
-    };
+	vector<char> validPositions;
+	if(X-1 > 0 && posMatrix[X-1][Y] == ' '){ //NORTH
+		validPositions.push_back('N');
+	}
+
+	if(Y+1 < C && posMatrix[X][Y+1] == ' '){ //EAST
+		validPositions.push_back('E');
+	}
+
+	if(X+1 < R && posMatrix[X+1][Y] == ' '){ // SOUTH
+		validPositions.push_back('S');
+	}
+
+	if(Y-1 > 0 && posMatrix[X][Y-1] == ' ') { //WEST
+		validPositions.push_back('W');
+	}
+
+
     return validPositions;
-};
+}
 
 pair<int,int> chooseMovePosition(int currentGen, int xPos, int yPos, vector<char> posVal){
     int pos = (int) ((currentGen + xPos + yPos) % posVal.size());
@@ -151,13 +154,24 @@ pair<int,int> chooseMovePosition(int currentGen, int xPos, int yPos, vector<char
 };
 
 void analyzeRabbits(vector<Rabbit> rabbitList, int currentGen){
+	vector<Rabbit> rabbitsListTemp;
     while(!rabbitList.empty()){
         Rabbit r = rabbitList.front();
         rabbitList.erase(rabbitList.begin());
         int x = r.pos_x;
         int y = r.pos_y;
         vector<char> validPositions = checkAdjacencies(x,y);
-        chooseMovePosition(currentGen,x,y,validPositions);
+        if(validPositions.size() > 0){
+        	pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
+			Rabbit rabbitTemp = Rabbit(r.procAge+1, get<0>(posToMove), get<1>(posToMove));
+			rabbitsListTemp.push_back(rabbitTemp);
+
+            //to do: add to posmatrixTemp
+		}
+		else{
+			Rabbit rabbitTemp = Rabbit(r.procAge+1, x, y);
+			rabbitsListTemp.push_back(rabbitTemp);
+		}
     }
 }
 
@@ -173,15 +187,18 @@ int main(int argc, char* argv[]) {
     cin >> GEN_PROC_RABBITS >> GEN_PROC_FOXES >> GEN_FOOD_FOXES >> N_GEN >> R >> C >> N;
 
     posMatrix = new char*[R];
+	posMatrixTemp = new char*[R];
 
     for (int i = 0; i < R; ++i) {
         posMatrix[i] = new char[C];
+		posMatrixTemp = new char*[R];
     }
 
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
             posMatrix[i][j] = ' ';
+			posMatrixTemp[i][j] = ' ';
         }
     }
 
@@ -193,7 +210,7 @@ int main(int argc, char* argv[]) {
         cin >> TYPE >> X >> Y;
 
         if (TYPE == "RABBIT"){
-            Rabbit r = Rabbit(X, Y);
+            Rabbit r = Rabbit(0, X, Y);
             RabbitsList.push_back(r);
             posMatrix[X][Y] = 'R';
             ageMatrix[X][Y] = r.procAge;
