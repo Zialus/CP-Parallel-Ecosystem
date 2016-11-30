@@ -1,11 +1,12 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <stdlib.h>
+#include <malloc.h>
 
 using namespace std;
 
-char** posMatrix;
-char** posMatrixTemp;
+
 //int** ageMatrix;
 //int** hungryMatrix;
 
@@ -17,22 +18,14 @@ int R ; // number of rows of the matrix representing the ecosystem
 int C ; // number of columns of the matrix representing the ecosystem
 int N ; // number of objects in the initial ecosystem
 
-typedef enum { RABBIT, FOX, ROCK} ElementType;
+typedef enum ElementType { RABBIT, FOX, ROCK, EMPTY
+} ElementType;
 
-struct MatrixElement{
 
-    ElementType element_type;
-
-    union {
-        struct Rabbit;
-        struct Fox;
-        struct Rock;
-    } e;
-
-    int ID;
-};
 
 struct Rock {
+
+    Rock(){}
 
     Rock(int x,int y){
         pos_x = x;
@@ -44,6 +37,8 @@ struct Rock {
 };
 
 struct Rabbit {
+
+    Rabbit(){}
 
     Rabbit(int a, int x, int y) {
         procAge = a;
@@ -58,6 +53,8 @@ struct Rabbit {
 
 struct Fox {
 
+        Fox(){}
+
     Fox(int a, int x, int y) {
         hungryAge = 0;
         procAge = a;
@@ -70,6 +67,31 @@ struct Fox {
     int pos_x;
     int pos_y;
 };
+
+
+struct MatrixElement{
+
+    MatrixElement(){}
+
+    MatrixElement(ElementType type){
+        element_type = type;
+    }
+
+    ElementType element_type;
+
+    union {
+        struct Rabbit rb;
+        struct Fox fx;
+        struct Rock rk;
+    } e;
+
+    int ID;
+};
+
+
+
+MatrixElement** posMatrix;
+MatrixElement** posMatrixTemp;
 
 void printFinalResults(char** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES){
 
@@ -133,19 +155,19 @@ void simGen(){
 
 vector<char> checkAdjacencies(int X, int Y){
     vector<char> validPositions;
-    if(X-1 > 0 && posMatrix[X-1][Y] == ' '){ //NORTH
+    if(X-1 > 0 && posMatrix[X-1][Y].element_type == ElementType::EMPTY){ //NORTH
         validPositions.push_back('N');
     }
 
-    if(Y+1 < C && posMatrix[X][Y+1] == ' '){ //EAST
+    if(Y+1 < C && posMatrix[X][Y+1].element_type == ElementType::EMPTY){ //EAST
         validPositions.push_back('E');
     }
 
-    if(X+1 < R && posMatrix[X+1][Y] == ' '){ // SOUTH
+    if(X+1 < R && posMatrix[X+1][Y].element_type == ElementType::EMPTY){ // SOUTH
         validPositions.push_back('S');
     }
 
-    if(Y-1 > 0 && posMatrix[X][Y-1] == ' ') { //WEST
+    if(Y-1 > 0 && posMatrix[X][Y-1].element_type == ElementType::EMPTY) { //WEST
         validPositions.push_back('W');
     }
 
@@ -191,7 +213,9 @@ void analyzeRabbits(vector<Rabbit> rabbitList, int currentGen){
         vector<char> validPositions = checkAdjacencies(x,y);
         if(validPositions.size() > 0){
             pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
-            Rabbit rabbitTemp = Rabbit(r.procAge+1, get<0>(posToMove), get<1>(posToMove));
+            Rabbit rabbitTemp = Rabbit(r.procAge+1, posToMove.first , posToMove.second);
+
+
             rabbitsListTemp.push_back(rabbitTemp);
 
             //to do: add to posmatrixTemp
@@ -214,18 +238,21 @@ int main(int argc, char* argv[]) {
 
     cin >> GEN_PROC_RABBITS >> GEN_PROC_FOXES >> GEN_FOOD_FOXES >> N_GEN >> R >> C >> N;
 
-    posMatrix = new char*[R];
-    posMatrixTemp = new char*[R];
+    posMatrix = new MatrixElement*[R];
+    posMatrixTemp = new MatrixElement*[R];
 
     for (int i = 0; i < R; ++i) {
-        posMatrix[i] = new char[C];
-        posMatrixTemp[i] = new char[C];
+        posMatrix[i] = new MatrixElement[C];
+        posMatrixTemp[i] = new MatrixElement[C];
     }
 
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
-            posMatrix[i][j] = ' ';
+            MatrixElement el = MatrixElement(ElementType::EMPTY);
+
+            posMatrix[i][j] = el;
+            posMatrixTemp[i][j] = el;
         }
     }
 
@@ -239,15 +266,20 @@ int main(int argc, char* argv[]) {
         if (TYPE == "RABBIT"){
             Rabbit r = Rabbit(0, X, Y);
             RabbitsList.push_back(r);
-            posMatrix[X][Y] = 'R';
+			MatrixElement el = MatrixElement(ElementType::RABBIT);
+            el.e = r;
+            posMatrix[X][Y] = el;
         }
         else if (TYPE == "FOX"){
             Fox f = Fox(0,X,Y);
             FoxesList.push_back(f);
-            posMatrix[X][Y] = 'F';
+            MatrixElement el = MatrixElement(ElementType::FOX);
+            el->e.Fox = f;
+            posMatrix[X][Y] = el;
         }
         else if (TYPE == "ROCK"){
-            posMatrix[X][Y] = '*';
+            MatrixElement el = MatrixElement(ElementType::ROCK);
+            posMatrix[X][Y] = el;
         }
         else {
             cout << "YOU FUCKED UP" << endl;
