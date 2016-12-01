@@ -13,7 +13,7 @@ typedef enum { RABBIT, FOX, ROCK, EMPTY } ElementType;
 
 struct Rock {
 
-    Rock(){}
+    Rock() = default;
 
     Rock(int x,int y){
         pos_x = x;
@@ -26,7 +26,7 @@ struct Rock {
 
 struct Rabbit {
 
-    Rabbit(){}
+    Rabbit() = default;
 
     Rabbit(int a, int x, int y) {
         procAge = a;
@@ -41,7 +41,7 @@ struct Rabbit {
 
 struct Fox {
 
-    Fox(){}
+    Fox() = default;
 
     Fox(int a, int x, int y) {
         hungryAge = 0;
@@ -59,7 +59,7 @@ struct Fox {
 
 struct MatrixElement{
 
-    MatrixElement(){}
+    MatrixElement() = default;
 
     MatrixElement(ElementType type){
         element_type = type;
@@ -140,10 +140,7 @@ void printMatrix(MatrixElement** matrix, int R, int C) {
 
 }
 
-void simGen(){
 
-
-}
 
 
 std::vector<char> checkAdjacencies(MatrixElement** matrix ,int X, int Y){
@@ -196,7 +193,7 @@ std::pair<int,int> chooseMovePosition(int currentGen, int xPos, int yPos, std::v
 
 };
 
-void analyzeRabbits(MatrixElement** matrix, std::vector<Rabbit> rabbitList, int currentGen){
+void analyzeRabbits(MatrixElement** matrix, MatrixElement** matrixTemp, std::vector<Rabbit> rabbitList, int currentGen){
     std::vector<Rabbit> rabbitsListTemp;
     while(!rabbitList.empty()){
         Rabbit r = rabbitList.front();
@@ -206,10 +203,31 @@ void analyzeRabbits(MatrixElement** matrix, std::vector<Rabbit> rabbitList, int 
         std::vector<char> validPositions = checkAdjacencies(matrix, x, y);
         if(validPositions.size() > 0){
             std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
-            Rabbit rabbitTemp = Rabbit(r.procAge+1, posToMove.first , posToMove.second);
+            int xToMove = posToMove.first;
+            int yToMove = posToMove.second;
+            if(matrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY){
+                if(r.procAge == GEN_PROC_RABBITS){
+                    Rabbit newRabbit = Rabbit(0, xToMove, yToMove);
+                    Rabbit babyRabbit = Rabbit(0, x, y);
+                    MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+                    MatrixElement elBaby = MatrixElement(ElementType::RABBIT);
+                    elNew.e.rb = newRabbit;
+                    elBaby.e.rb = babyRabbit;
+                    matrixTemp[x][y] = elBaby;
+                    matrixTemp[xToMove][yToMove] = elNew;
+                    rabbitsListTemp.push_back(newRabbit);
+                    rabbitsListTemp.push_back(babyRabbit);
+                }
+                else{
+                    Rabbit newRabbit = Rabbit(r.procAge+1, xToMove, yToMove);
+                    MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+                    elNew.e.rb = newRabbit;
+                    matrixTemp[xToMove][yToMove] = elNew;
+                    rabbitsListTemp.push_back(newRabbit);
+                }
 
+            }
 
-            rabbitsListTemp.push_back(rabbitTemp);
 
             //to do: add to posmatrixTemp
         }
@@ -218,6 +236,12 @@ void analyzeRabbits(MatrixElement** matrix, std::vector<Rabbit> rabbitList, int 
             rabbitsListTemp.push_back(rabbitTemp);
         }
     }
+}
+
+
+void simGen(MatrixElement** matrix, MatrixElement** matrixTemp, int gen, std::vector<Rabbit> rabbitList, std::vector<Fox> foxList){
+    analyzeRabbits(matrix, matrixTemp, rabbitList, gen);
+    // falta cenas (obviously)
 }
 
 int main(int argc, char* argv[]) {
@@ -274,6 +298,7 @@ int main(int argc, char* argv[]) {
             posMatrix[X][Y] = el;
         }
         else if (TYPE == "ROCK"){
+            // new rock maybe??
             MatrixElement el = MatrixElement(ElementType::ROCK);
             posMatrix[X][Y] = el;
         }
@@ -283,7 +308,7 @@ int main(int argc, char* argv[]) {
     }
 
     for(int i=0; i<N_GEN; i++){
-        simGen();
+        simGen(posMatrix, posMatrixTemp, i, RabbitsList, FoxesList);
     }
 
     printMatrix(posMatrix, R, C);
