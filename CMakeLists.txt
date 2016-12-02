@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 14)
 #    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 #endif()
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp main.hpp)
 add_executable(ecosystem ${SOURCE_FILES})
 
 enable_testing()
