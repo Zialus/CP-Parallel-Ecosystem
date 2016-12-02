@@ -9,6 +9,10 @@ int R ; // number of rows of the matrix representing the ecosystem
 int C ; // number of columns of the matrix representing the ecosystem
 int N ; // number of objects in the initial ecosystem
 
+struct MatrixElement;
+MatrixElement** posMatrix;
+MatrixElement** posMatrixTemp;
+
 typedef enum { RABBIT, FOX, ROCK, EMPTY } ElementType;
 
 struct Rock {
@@ -71,19 +75,21 @@ struct MatrixElement{
         struct Rabbit rb;
         struct Fox fx;
         struct Rock rk;
-    } e;
+    } elem;
 
     int ID;
 
     char getChar(){
         switch (this->element_type){
-            case RABBIT: return 'R'; break;
-            case FOX: return 'F'; break;
-            case ROCK: return '*'; break;
-            case EMPTY: return ' '; break;
+            case RABBIT: return 'R';
+            case FOX: return 'F';
+            case ROCK: return '*';
+            case EMPTY: return ' ';
         }
     }
 };
+
+
 
 
 void printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES){
@@ -143,21 +149,21 @@ void printMatrix(MatrixElement** matrix, int R, int C) {
 
 
 
-std::vector<char> checkAdjacencies(MatrixElement** matrix ,int X, int Y){
+std::vector<char> checkAdjacencies(MatrixElement** matrix ,int X, int Y,ElementType type){
     std::vector<char> validPositions;
-    if(X-1 > 0 && matrix[X-1][Y].element_type == ElementType::EMPTY){ //NORTH
+    if(X-1 > 0 && matrix[X-1][Y].element_type == type){ //NORTH
         validPositions.push_back('N');
     }
 
-    if(Y+1 < C && matrix[X][Y+1].element_type == ElementType::EMPTY){ //EAST
+    if(Y+1 < C && matrix[X][Y+1].element_type == type){ //EAST
         validPositions.push_back('E');
     }
 
-    if(X+1 < R && matrix[X+1][Y].element_type == ElementType::EMPTY){ // SOUTH
+    if(X+1 < R && matrix[X+1][Y].element_type == type){ // SOUTH
         validPositions.push_back('S');
     }
 
-    if(Y-1 > 0 && matrix[X][Y-1].element_type == ElementType::EMPTY) { //WEST
+    if(Y-1 > 0 && matrix[X][Y-1].element_type == type) { //WEST
         validPositions.push_back('W');
     }
 
@@ -200,40 +206,123 @@ void analyzeRabbits(MatrixElement** matrix, MatrixElement** matrixTemp, std::vec
         rabbitList.erase(rabbitList.begin());
         int x = r.pos_x;
         int y = r.pos_y;
-        std::vector<char> validPositions = checkAdjacencies(matrix, x, y);
+        std::vector<char> validPositions = checkAdjacencies(matrix, x, y, ElementType::EMPTY);
         if(validPositions.size() > 0){
             std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
             int xToMove = posToMove.first;
             int yToMove = posToMove.second;
             if(matrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY){
-                if(r.procAge == GEN_PROC_RABBITS){
-                    Rabbit newRabbit = Rabbit(0, xToMove, yToMove);
+                if(r.procAge >= GEN_PROC_RABBITS){
+                    Rabbit fatherRabbit = Rabbit(0, xToMove, yToMove);
                     Rabbit babyRabbit = Rabbit(0, x, y);
-                    MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+                    MatrixElement elFather = MatrixElement(ElementType::RABBIT);
                     MatrixElement elBaby = MatrixElement(ElementType::RABBIT);
-                    elNew.e.rb = newRabbit;
-                    elBaby.e.rb = babyRabbit;
+                    elFather.elem.rb = fatherRabbit;
+                    elBaby.elem.rb = babyRabbit;
                     matrixTemp[x][y] = elBaby;
-                    matrixTemp[xToMove][yToMove] = elNew;
-                    rabbitsListTemp.push_back(newRabbit);
+                    matrixTemp[xToMove][yToMove] = elFather;
+                    rabbitsListTemp.push_back(fatherRabbit);
                     rabbitsListTemp.push_back(babyRabbit);
                 }
                 else{
                     Rabbit newRabbit = Rabbit(r.procAge+1, xToMove, yToMove);
                     MatrixElement elNew = MatrixElement(ElementType::RABBIT);
-                    elNew.e.rb = newRabbit;
+                    elNew.elem.rb = newRabbit;
                     matrixTemp[xToMove][yToMove] = elNew;
                     rabbitsListTemp.push_back(newRabbit);
                 }
 
             }
+            else if(matrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT){
+                if(r.procAge > matrixTemp[xToMove][yToMove].elem.rb.procAge){
+
+                    Rabbit newRabbit = Rabbit(r.procAge+1, xToMove, yToMove);
+                    MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+                    elNew.elem.rb = newRabbit;
+                    matrixTemp[xToMove][yToMove] = elNew;
+                    rabbitsListTemp.push_back(newRabbit);
+                }
+
+            }
+            else{
+                std::cout << "You kynda fucked up.." << std::endl;
+            }
 
 
-            //to do: add to posmatrixTemp
         }
         else{
-            Rabbit rabbitTemp = Rabbit(r.procAge+1, x, y);
-            rabbitsListTemp.push_back(rabbitTemp);
+            Rabbit newRabbit = Rabbit(r.procAge+1, x, y);
+            rabbitsListTemp.push_back(newRabbit);
+            MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+            elNew.elem.rb = newRabbit;
+            matrixTemp[x][y] = elNew;
+        }
+    }
+}
+
+void analyzeFoxes(MatrixElement** matrix, MatrixElement** matrixTemp, std::vector<Fox> foxList, int currentGen){
+
+    std::vector<Fox> foxListTemp;
+    while(!foxList.empty()){
+        Fox f = foxList.front();
+        foxList.erase(foxList.begin());
+        int x = f.pos_x;
+        int y = f.pos_y;
+        std::vector<char> validPositionsWithRabbits = checkAdjacencies(matrix, x, y, ElementType::RABBIT);
+        std::vector<char> validPositions = checkAdjacencies(matrix, x, y, ElementType::EMPTY);
+        if(validPositionsWithRabbits.size() > 0){
+            std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
+            int xToMove = posToMove.first;
+            int yToMove = posToMove.second;
+            if(matrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY){
+                if(r.procAge >= GEN_PROC_RABBITS){
+                    Rabbit fatherRabbit = Rabbit(0, xToMove, yToMove);
+                    Rabbit babyRabbit = Rabbit(0, x, y);
+                    MatrixElement elFather = MatrixElement(ElementType::RABBIT);
+                    MatrixElement elBaby = MatrixElement(ElementType::RABBIT);
+                    elFather.elem.rb = fatherRabbit;
+                    elBaby.elem.rb = babyRabbit;
+                    matrixTemp[x][y] = elBaby;
+                    matrixTemp[xToMove][yToMove] = elFather;
+                    rabbitsListTemp.push_back(fatherRabbit);
+                    rabbitsListTemp.push_back(babyRabbit);
+                }
+                else{
+                    Rabbit newRabbit = Rabbit(r.procAge+1, xToMove, yToMove);
+                    MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+                    elNew.elem.rb = newRabbit;
+                    matrixTemp[xToMove][yToMove] = elNew;
+                    rabbitsListTemp.push_back(newRabbit);
+                }
+
+            }
+            else if(matrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT){
+                if(r.procAge > matrixTemp[xToMove][yToMove].elem.rb.procAge){
+
+                    Rabbit newRabbit = Rabbit(r.procAge+1, xToMove, yToMove);
+                    MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+                    elNew.elem.rb = newRabbit;
+                    matrixTemp[xToMove][yToMove] = elNew;
+                    rabbitsListTemp.push_back(newRabbit);
+                }
+
+            }
+            else{
+                std::cout << "You kynda fucked up.." << std::endl;
+            }
+
+
+        }
+        else if(validPositions.size() > 0){
+
+        }
+
+        else{
+            Rabbit newRabbit = Rabbit(r.procAge+1, x, y);
+            rabbitsListTemp.push_back(newRabbit);
+            MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+            elNew.elem.rb = newRabbit;
+            matrixTemp[x][y] = elNew;
         }
     }
 }
@@ -241,16 +330,20 @@ void analyzeRabbits(MatrixElement** matrix, MatrixElement** matrixTemp, std::vec
 
 void simGen(MatrixElement** matrix, MatrixElement** matrixTemp, int gen, std::vector<Rabbit> rabbitList, std::vector<Fox> foxList){
     analyzeRabbits(matrix, matrixTemp, rabbitList, gen);
+    //passar cenas das listas... maybe
+
+//    analyzeFoxes();
     // falta cenas (obviously)
 }
 
 int main(int argc, char* argv[]) {
 
-    MatrixElement** posMatrix;
-    MatrixElement** posMatrixTemp;
+
 
     std::vector<Rabbit> RabbitsList;
     std::vector<Fox> FoxesList;
+    std::vector<Rock> RockList;
+
 
     if (argc == 2){
         freopen(argv[1], "r", stdin);
@@ -270,7 +363,6 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
             MatrixElement el = MatrixElement(ElementType::EMPTY);
-
             posMatrix[i][j] = el;
             posMatrixTemp[i][j] = el;
         }
@@ -287,19 +379,21 @@ int main(int argc, char* argv[]) {
             Rabbit r = Rabbit(0, X, Y);
             RabbitsList.push_back(r);
             MatrixElement el = MatrixElement(ElementType::RABBIT);
-            el.e.rb = r;
+            el.elem.rb = r;
             posMatrix[X][Y] = el;
         }
         else if (TYPE == "FOX"){
             Fox f = Fox(0,X,Y);
             FoxesList.push_back(f);
             MatrixElement el = MatrixElement(ElementType::FOX);
-            el.e.fx = f;
+            el.elem.fx = f;
             posMatrix[X][Y] = el;
         }
         else if (TYPE == "ROCK"){
-            // new rock maybe??
+            Rock rk = Rock(X,Y);
+            RockList.push_back(rk);
             MatrixElement el = MatrixElement(ElementType::ROCK);
+            el.elem.rk = rk;
             posMatrix[X][Y] = el;
         }
         else {
