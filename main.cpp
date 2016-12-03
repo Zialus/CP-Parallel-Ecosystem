@@ -136,7 +136,6 @@ void analyzeRabbits(MatrixElement** matrix, MatrixElement** matrixTemp, std::vec
             int yToMove = posToMove.second;
 
             if(matrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY){
-
                 if(r.procAge >= GEN_PROC_RABBITS){
                     Rabbit fatherRabbit = Rabbit(0, xToMove, yToMove);
                     Rabbit babyRabbit = Rabbit(0, x, y);
@@ -154,18 +153,36 @@ void analyzeRabbits(MatrixElement** matrix, MatrixElement** matrixTemp, std::vec
                     elNew.elem.rb = newRabbit;
                     matrixTemp[xToMove][yToMove] = elNew;
                     rabbitsListTemp.push_back(newRabbit);
+                    // será preciso criar um MatrixElement::EMPTY para a posição onde o rabbit estava?
                 }
 
-            } else if(matrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT){
-
+            }
+            else if(matrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT){
                 if(r.procAge > matrixTemp[xToMove][yToMove].elem.rb.procAge){
-
-                    Rabbit newRabbit = Rabbit(r.procAge+1, xToMove, yToMove);
-                    MatrixElement elNew = MatrixElement(ElementType::RABBIT);
-                    elNew.elem.rb = newRabbit;
-                    matrixTemp[xToMove][yToMove] = elNew;
-                    rabbitsListTemp.push_back(newRabbit);
+                    if(r.procAge >= GEN_PROC_RABBITS){
+                        Rabbit fatherRabbit = Rabbit(0, xToMove, yToMove);
+                        Rabbit babyRabbit = Rabbit(0, x, y);
+                        MatrixElement elFather = MatrixElement(ElementType::RABBIT);
+                        MatrixElement elBaby = MatrixElement(ElementType::RABBIT);
+                        elFather.elem.rb = fatherRabbit;
+                        elBaby.elem.rb = babyRabbit;
+                        matrixTemp[x][y] = elBaby;
+                        matrixTemp[xToMove][yToMove] = elFather;
+                        //falta eliminar de rabbitsListTemp o rabbit que já tava na posição (xToMove, yToMove)
+                        //o que acontece ao filho do rabbit que já lá estava?? (se ele tivesse tido um filho)
+                        rabbitsListTemp.push_back(fatherRabbit);
+                        rabbitsListTemp.push_back(babyRabbit);
+                    } else {
+                        Rabbit newRabbit = Rabbit(r.procAge + 1, xToMove, yToMove);
+                        MatrixElement elNew = MatrixElement(ElementType::RABBIT);
+                        elNew.elem.rb = newRabbit;
+                        matrixTemp[xToMove][yToMove] = elNew;
+                        //falta eliminar de rabbitsListTemp o rabbit que já tava na posição (xToMove, yToMove)
+                        rabbitsListTemp.push_back(newRabbit);
+                    }
                 }
+                // else, he dies
+
 
             } else{
                 perror("analyzeRabbits was used improperly");
@@ -191,16 +208,19 @@ void analyzeFoxes(MatrixElement** matrix, MatrixElement** matrixTemp, std::vecto
         foxList.erase(foxList.begin());
         int x = f.pos_x;
         int y = f.pos_y;
+        int h = f.hungryAge;
+        int p = f.procAge;
         std::vector<char> validPositionsWithRabbits = checkAdjacencies(matrix, x, y, ElementType::RABBIT);
         std::vector<char> validPositions = checkAdjacencies(matrix, x, y, ElementType::EMPTY);
         if(validPositionsWithRabbits.size() > 0){
-            std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
+            std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositionsWithRabbits);
             int xToMove = posToMove.first;
             int yToMove = posToMove.second;
+            //more like: if(matrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT) ?? :x
             if(matrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY){
-                if(f.procAge >= GEN_PROC_RABBITS){
-                    Fox fatherFox = Fox(0, xToMove, yToMove);
-                    Fox babyFox = Fox(0, x, y);
+                if(f.procAge >= GEN_PROC_FOXES){
+                    Fox fatherFox = Fox(0 ,0, xToMove, yToMove);
+                    Fox babyFox = Fox(0, 0, x, y);
                     MatrixElement elFather = MatrixElement(ElementType::FOX);
                     MatrixElement elBaby = MatrixElement(ElementType::FOX);
                     elFather.elem.fx = fatherFox;
@@ -211,7 +231,7 @@ void analyzeFoxes(MatrixElement** matrix, MatrixElement** matrixTemp, std::vecto
                     foxListTemp.push_back(babyFox);
                 }
                 else{
-                    Fox newFox = Fox(f.procAge+1, xToMove, yToMove);
+                    Fox newFox = Fox(0, p+1, xToMove, yToMove);
                     MatrixElement elNew = MatrixElement(ElementType::FOX);
                     elNew.elem.fx = newFox;
                     matrixTemp[xToMove][yToMove] = elNew;
@@ -220,9 +240,10 @@ void analyzeFoxes(MatrixElement** matrix, MatrixElement** matrixTemp, std::vecto
 
             }
             else if(matrixTemp[xToMove][yToMove].element_type == ElementType::FOX){
+                //se já estiver lá uma fox, já não existe rabbit, soooooo hungryAge+1 ?? :/
                 if(f.procAge > matrixTemp[xToMove][yToMove].elem.fx.procAge){
 
-                    Fox newFox = Fox(f.procAge+1, xToMove, yToMove);
+                    Fox newFox = Fox(h+1, p+1, xToMove, yToMove);
                     MatrixElement elNew = MatrixElement(ElementType::FOX);
                     elNew.elem.fx = newFox;
                     matrixTemp[xToMove][yToMove] = elNew;
@@ -242,7 +263,7 @@ void analyzeFoxes(MatrixElement** matrix, MatrixElement** matrixTemp, std::vecto
         }
 
         else{
-            Fox newFox = Fox(f.procAge+1, x, y);
+            Fox newFox = Fox(h+1, p+1, x, y);
             foxListTemp.push_back(newFox);
             MatrixElement elNew = MatrixElement(ElementType::FOX);
             elNew.elem.fx = newFox;
@@ -310,7 +331,7 @@ int main(int argc, char* argv[]) {
             posMatrix[X][Y] = el;
         }
         else if (TYPE == "FOX"){
-            Fox f = Fox(0,X,Y);
+            Fox f = Fox(0,0,X,Y);
             FoxesList.push_back(f);
             MatrixElement el = MatrixElement(ElementType::FOX);
             el.elem.fx = f;

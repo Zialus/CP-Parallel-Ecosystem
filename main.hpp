@@ -36,7 +36,7 @@ struct Fox {
 
     Fox() = default;
 
-    Fox(int a, int x, int y) {
+    Fox(int h, int a, int x, int y) {
         hungryAge = 0;
         procAge = a;
         pos_x = x;
