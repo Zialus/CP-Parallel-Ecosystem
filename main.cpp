@@ -7,6 +7,9 @@
 MatrixElement** posMatrix;
 MatrixElement** posMatrixTemp;
 
+MatrixElement* auxMatrix;
+MatrixElement* auxMatrixTemp;
+
 
 std::unordered_set<Rabbit> RabbitSet;
 std::unordered_set<Fox>    FoxSet;
@@ -19,8 +22,6 @@ int N_GEN ; // number of generations for the simulation
 int R ; // number of rows of the matrix representing the ecosystem
 int C ; // number of columns of the matrix representing the ecosystem
 int N ; // number of objects in the initial ecosystem
-
-void prepareMatrixTemp();
 
 void printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES){
 
@@ -209,7 +210,7 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
     return RabbitSetTemp;
 }
 
-void analyzeFoxes(std::unordered_set<Rabbit> RabbitSet, std::unordered_set<Fox> FoxSet, int currentGen){
+std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Rabbit> RabbitSet, std::unordered_set<Fox> FoxSet, int currentGen){
 
     std::unordered_set<Fox> FoxSetTemp;
 
@@ -282,7 +283,10 @@ void analyzeFoxes(std::unordered_set<Rabbit> RabbitSet, std::unordered_set<Fox> 
             posMatrixTemp[x][y] = elNew;
         }
     }
+    return FoxSetTemp;
+
 }
+
 
 
 void simGen(int gen){
@@ -291,15 +295,15 @@ void simGen(int gen){
 
     RabbitSet = analyzeRabbits(RabbitSet, gen);
 
-    memcpy(posMatrix,posMatrixTemp, R*C*sizeof(MatrixElement));
+    memcpy(auxMatrix, auxMatrixTemp, R*C*sizeof(MatrixElement));
 
-    analyzeFoxes(RabbitSet, FoxSet, gen);
+    FoxSet = analyzeFoxes(RabbitSet, FoxSet, gen);
 
 }
 
 void prepareMatrixTemp() {
 
-    memcpy(posMatrixTemp, posMatrix, R*C*sizeof(MatrixElement));
+    memcpy(auxMatrixTemp, auxMatrix, sizeof(MatrixElement)*R*C);
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
@@ -319,9 +323,9 @@ int main(int argc, char* argv[]) {
     std::cin >> GEN_PROC_RABBITS >> GEN_PROC_FOXES >> GEN_FOOD_FOXES >> N_GEN >> R >> C >> N;
 
     posMatrix = new MatrixElement*[R];
-    MatrixElement* auxMatrix = new MatrixElement[R*C];
+    auxMatrix = new MatrixElement[R*C];
     posMatrixTemp = new MatrixElement*[R];
-    MatrixElement* auxMatrixTemp = new MatrixElement[R*C];
+    auxMatrixTemp = new MatrixElement[R*C];
 
     for (int i = 0; i < R; ++i) {
         posMatrix[i] = &auxMatrix[i*C];
