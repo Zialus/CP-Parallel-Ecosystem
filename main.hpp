@@ -15,6 +15,12 @@ struct Rock {
 
     int pos_x;
     int pos_y;
+
+    bool operator==(const Rock& a) const
+    {
+        return (pos_x == a.pos_x && pos_y == a.pos_y);
+    }
+
 };
 
 struct Rabbit {
@@ -30,6 +36,11 @@ struct Rabbit {
     int procAge;
     int pos_x;
     int pos_y;
+
+    bool operator==(const Rabbit& a) const
+    {
+        return (procAge == a.procAge && pos_x == a.pos_x && pos_y == a.pos_y);
+    }
 };
 
 struct Fox {
@@ -47,6 +58,11 @@ struct Fox {
     int procAge;
     int pos_x;
     int pos_y;
+
+    bool operator==(const Fox& a) const
+    {
+        return (hungryAge == a.hungryAge && procAge == a.procAge && pos_x == a.pos_x && pos_y == a.pos_y);
+    }
 };
 
 struct MatrixElement{
@@ -86,6 +102,8 @@ namespace std {
                     * 53 + std::hash<int>()(r.procAge)
             );
         }
+
+
     };
 }
 

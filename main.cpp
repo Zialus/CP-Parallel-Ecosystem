@@ -1,10 +1,16 @@
 #include <iostream>
 #include <vector>
 #include <unordered_set>
+#include <cstring>
 #include "main.hpp"
 
 MatrixElement** posMatrix;
 MatrixElement** posMatrixTemp;
+
+
+std::unordered_set<Rabbit> RabbitSet;
+std::unordered_set<Fox>    FoxSet;
+std::unordered_set<Rock>   RockSet;
 
 int GEN_PROC_RABBITS ; // number of generations until a rabbit can procreate
 int GEN_PROC_FOXES ; // number of generations until a fox can procreate
@@ -123,7 +129,7 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
 
     std::unordered_set<Rabbit> RabbitSetTemp;
 
-    for (auto rabbit : RabbitSet) {
+    for (const auto& rabbit: RabbitSet) {
 
         int x = rabbit.pos_x;
         int y = rabbit.pos_y;
@@ -207,7 +213,7 @@ void analyzeFoxes(std::unordered_set<Rabbit> RabbitSet, std::unordered_set<Fox> 
 
     std::unordered_set<Fox> FoxSetTemp;
 
-    for (auto fox : FoxSet) {
+    for (const auto& fox: FoxSet) {
 
         int x = fox.pos_x;
         int y = fox.pos_y;
@@ -279,7 +285,7 @@ void analyzeFoxes(std::unordered_set<Rabbit> RabbitSet, std::unordered_set<Fox> 
 }
 
 
-void simGen(int gen, std::unordered_set<Rabbit> RabbitSet, std::unordered_set<Fox> FoxSet){
+void simGen(int gen){
 
     prepareMatrixTemp();
 
@@ -306,14 +312,6 @@ void prepareMatrixTemp() {
 
 int main(int argc, char* argv[]) {
 
-//    std::vector<Rabbit> RabbitsList;
-//    std::vector<Fox>    FoxesList;
-//    std::vector<Rock>   RockList;
-
-    std::unordered_set<Rabbit> RabbitSet;
-    std::unordered_set<Fox>    FoxSet;
-    std::unordered_set<Rock>   RockSet;
-
     if (argc == 2){
         freopen(argv[1], "r", stdin);
     }
@@ -321,11 +319,13 @@ int main(int argc, char* argv[]) {
     std::cin >> GEN_PROC_RABBITS >> GEN_PROC_FOXES >> GEN_FOOD_FOXES >> N_GEN >> R >> C >> N;
 
     posMatrix = new MatrixElement*[R];
+    MatrixElement* auxMatrix = new MatrixElement[R*C];
     posMatrixTemp = new MatrixElement*[R];
+    MatrixElement* auxMatrixTemp = new MatrixElement[R*C];
 
     for (int i = 0; i < R; ++i) {
-        posMatrix[i] = new MatrixElement[C];
-        posMatrixTemp[i] = new MatrixElement[C];
+        posMatrix[i] = &auxMatrix[i*C];
+        posMatrixTemp[i] = &auxMatrixTemp[i*C];
     }
 
     for (int i = 0; i < R; ++i) {
@@ -370,7 +370,10 @@ int main(int argc, char* argv[]) {
     }
 
     for(int gen=0; gen<N_GEN; gen++){
-        simGen(gen, RabbitSet, FoxSet);
+        std::cout << "Geração: " << gen << std::endl;
+        printMatrix(posMatrix, R,C);
+        simGen(gen);
+
     }
 
     printMatrix(posMatrix, R, C);
