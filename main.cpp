@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_set>
 #include <cstring>
+#include <sys/timeb.h>
 #include "main.hpp"
 
 MatrixElement** posMatrix;
@@ -263,7 +264,9 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
                 FoxSet.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
 
 
-                if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge){
+                if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
+                        ( fox.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                           && fox.hungryAge < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)){
 
                     Fox newFox = Fox(0, p+1, xToMove, yToMove);
                     MatrixElement elNew = MatrixElement(ElementType::FOX);
@@ -311,14 +314,28 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
             //falta verificar se uma fox tem menos fome que a outra (se as suas procAge forem iguais)
             else if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX){
-
-                if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge){
-
-                    Fox newFox = Fox(h+1, p+1, xToMove, yToMove);
-                    MatrixElement elNew = MatrixElement(ElementType::FOX);
-                    elNew.elem.fx = newFox;
-                    posMatrixTemp[xToMove][yToMove] = elNew;
-                    FoxSetTemp.insert(newFox);
+                if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
+                   ( fox.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                     && fox.hungryAge < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)){
+                    if(fox.procAge >= GEN_PROC_FOXES){
+                        Fox fatherFox = Fox(h+1 ,0, xToMove, yToMove);
+                        Fox babyFox = Fox(0, 0, x, y);
+                        MatrixElement elFather = MatrixElement(ElementType::FOX);
+                        MatrixElement elBaby = MatrixElement(ElementType::FOX);
+                        elFather.elem.fx = fatherFox;
+                        elBaby.elem.fx = babyFox;
+                        posMatrixTemp[x][y] = elBaby;
+                        posMatrixTemp[xToMove][yToMove] = elFather;
+                        FoxSetTemp.insert(fatherFox);
+                        FoxSetTemp.insert(babyFox);
+                    }
+                    else{
+                        Fox newFox = Fox(h+1, p+1, xToMove, yToMove);
+                        MatrixElement elNew = MatrixElement(ElementType::FOX);
+                        elNew.elem.fx = newFox;
+                        posMatrixTemp[xToMove][yToMove] = elNew;
+                        FoxSetTemp.insert(newFox);
+                    }
                 }
 
             }
@@ -449,14 +466,24 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    struct timeb start, end;
+    int diff;
+    ftime(&start);
+
     for(int gen=0; gen<N_GEN; gen++){
 //        std::cout << "Geração: " << gen << std::endl;
 //        printMatrix(posMatrix, R,C);
         simGen(gen);
     }
 
-//    std::cout << "Geração: " << N_GEN << std::endl;
-//    printMatrix(posMatrix, R, C);
+    ftime(&end);
+    diff = (int) (1000.0 * (end.time - start.time)
+                  + (end.millitm - start.millitm));
+
+    printf("\nOperation took %u milliseconds\n", diff);
+
+    std::cout << "Geração: " << N_GEN << std::endl;
+    printMatrix(posMatrix, R, C);
 
     printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
