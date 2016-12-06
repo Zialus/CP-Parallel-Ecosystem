@@ -280,6 +280,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
         }
         else if(validPositions.size() > 0 && fox.hungryAge+1 <= GEN_FOOD_FOXES){
+
             std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
             int xToMove = posToMove.first;
             int yToMove = posToMove.second;
@@ -334,6 +335,10 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             elNew.elem.fx = newFox;
             posMatrixTemp[x][y] = elNew;
         }
+        else if(fox.hungryAge+1 > GEN_FOOD_FOXES) {
+            posMatrixTemp[x][y] = MatrixElement(ElementType::EMPTY);
+        }
+
         else{
             std::cout << "Foxes fucked up.." << std::endl;
         }
@@ -453,9 +458,9 @@ int main(int argc, char* argv[]) {
         std::cout << "Geração: " << gen << std::endl;
         printMatrix(posMatrix, R,C);
         simGen(gen);
-
     }
 
+    std::cout << "Geração: " << N_GEN << std::endl;
     printMatrix(posMatrix, R, C);
 
 //    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
