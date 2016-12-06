@@ -135,4 +135,6 @@ namespace std {
 }
 
 
-void prepareMatrixTemp();
+void prepareTempForRabbit();
+void prepareTempForFox();
+

@@ -79,7 +79,7 @@ void printMatrix(MatrixElement** matrix, int R, int C) {
 
 std::vector<char> checkAdjacencies(MatrixElement** matrix ,int X, int Y,ElementType type){
     std::vector<char> validPositions;
-    if(X-1 > 0 && matrix[X-1][Y].element_type == type){ //NORTH
+    if(X-1 >= 0 && matrix[X-1][Y].element_type == type){ //NORTH
         validPositions.push_back('N');
     }
 
@@ -91,7 +91,7 @@ std::vector<char> checkAdjacencies(MatrixElement** matrix ,int X, int Y,ElementT
         validPositions.push_back('S');
     }
 
-    if(Y-1 > 0 && matrix[X][Y-1].element_type == type) { //WEST
+    if(Y-1 >= 0 && matrix[X][Y-1].element_type == type) { //WEST
         validPositions.push_back('W');
     }
 
@@ -180,6 +180,7 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
                         RabbitSetTemp.insert(fatherRabbit);
                         RabbitSetTemp.insert(babyRabbit);
                     } else {
+
                         Rabbit newRabbit = Rabbit(rabbit.procAge + 1, xToMove, yToMove);
                         MatrixElement elNew = MatrixElement(ElementType::RABBIT);
                         elNew.elem.rb = newRabbit;
@@ -199,6 +200,7 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
         } else {
             // There's no valid Position to move into. Rabbit raises the ProcAge and doesn't move.
             Rabbit newRabbit = Rabbit(rabbit.procAge + 1, x, y);
+
             RabbitSetTemp.insert(newRabbit);
             MatrixElement elNew = MatrixElement(ElementType::RABBIT);
             elNew.elem.rb = newRabbit;
@@ -229,8 +231,9 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             int yToMove = posToMove.second;
 
             if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT){
-
                 // delete the rabbit that was there
+                RabbitSet.erase(posMatrixTemp[xToMove][yToMove].elem.rb);
+
 
                 if(fox.procAge >= GEN_PROC_FOXES){
                     Fox fatherFox = Fox(0 ,0, xToMove, yToMove);
@@ -256,6 +259,8 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             else if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX){
 
                 // delete the fox that was there
+                FoxSet.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
+
 
                 if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge){
 
@@ -274,14 +279,14 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
 
         }
-        else if(validPositions.size() > 0){
-            std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositionsWithRabbits);
+        else if(validPositions.size() > 0 && fox.hungryAge+1 <= GEN_FOOD_FOXES){
+            std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
             int xToMove = posToMove.first;
             int yToMove = posToMove.second;
 
             if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY){
                 if(fox.procAge >= GEN_PROC_FOXES){
-                    Fox fatherFox = Fox(0 ,0, xToMove, yToMove);
+                    Fox fatherFox = Fox(h+1 ,0, xToMove, yToMove);
                     Fox babyFox = Fox(0, 0, x, y);
                     MatrixElement elFather = MatrixElement(ElementType::FOX);
                     MatrixElement elBaby = MatrixElement(ElementType::FOX);
@@ -293,7 +298,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
                     FoxSetTemp.insert(babyFox);
                 }
                 else{
-                    Fox newFox = Fox(0, p+1, xToMove, yToMove);
+                    Fox newFox = Fox(h+1, p+1, xToMove, yToMove);
                     MatrixElement elNew = MatrixElement(ElementType::FOX);
                     elNew.elem.fx = newFox;
                     posMatrixTemp[xToMove][yToMove] = elNew;
@@ -301,6 +306,8 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
                 }
 
             }
+
+            //falta verificar se uma fox tem menos fome que a outra (se as suas procAge forem iguais)
             else if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX){
 
                 if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge){
@@ -320,12 +327,15 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
         }
 
-        else{
+        else if(fox.hungryAge+1 <= GEN_FOOD_FOXES){
             Fox newFox = Fox(h+1, p+1, x, y);
             FoxSetTemp.insert(newFox);
             MatrixElement elNew = MatrixElement(ElementType::FOX);
             elNew.elem.fx = newFox;
             posMatrixTemp[x][y] = elNew;
+        }
+        else{
+            std::cout << "Foxes fucked up.." << std::endl;
         }
     }
 
@@ -336,18 +346,22 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
 void simGen(int gen){
 
-    prepareMatrixTemp();
+    prepareTempForRabbit();
+
+//    printMatrix(posMatrix, R,C);
 
     RabbitSet = analyzeRabbits(RabbitSet, gen);
 
     memcpy(auxMatrix, auxMatrixTemp, R*C*sizeof(MatrixElement));
 
+    prepareTempForFox();
+
     FoxSet = analyzeFoxes(FoxSet, gen);
 
+    memcpy(auxMatrix, auxMatrixTemp, R*C*sizeof(MatrixElement));
 }
 
-void prepareMatrixTemp() {
-
+void prepareTempForRabbit() {
     memcpy(auxMatrixTemp, auxMatrix, sizeof(MatrixElement)*R*C);
 
     for (int i = 0; i < R; ++i) {
@@ -357,7 +371,24 @@ void prepareMatrixTemp() {
             }
         }
     }
+//    printMatrix(posMatrixTemp, R,C);
+
 }
+
+void prepareTempForFox() {
+
+    for (int i = 0; i < R; ++i) {
+        for (int j = 0; j < C; ++j) {
+            if (posMatrixTemp[i][j].element_type == ElementType::FOX){
+                posMatrixTemp[i][j] = MatrixElement(ElementType::EMPTY);
+            }
+        }
+    }
+//    printMatrix(posMatrixTemp, R,C);
+
+}
+
+
 
 int main(int argc, char* argv[]) {
 
@@ -427,7 +458,7 @@ int main(int argc, char* argv[]) {
 
     printMatrix(posMatrix, R, C);
 
-    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
+//    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
     return 0;
 }

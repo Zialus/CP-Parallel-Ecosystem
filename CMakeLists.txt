@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(cp_rabits_and_foxes)
 
-set(CMAKE_CXX_STANDARD 11)
-
+set(CMAKE_CXX_STANDARD 14)
+#set(CMAKE_VERBOSE_MAKEFILE true)
 #FIND_PACKAGE(OpenMP REQUIRED)
 
 #if(OPENMP_FOUND)
