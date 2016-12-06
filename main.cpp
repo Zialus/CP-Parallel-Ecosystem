@@ -221,6 +221,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
         int x = fox.pos_x;
         int y = fox.pos_y;
         int h = fox.hungryAge;
+
         int p = fox.procAge;
         std::vector<char> validPositionsWithRabbits = checkAdjacencies(posMatrix, x, y, ElementType::RABBIT);
         std::vector<char> validPositions = checkAdjacencies(posMatrix, x, y, ElementType::EMPTY);
@@ -279,7 +280,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
 
         }
-        else if(validPositions.size() > 0 && fox.hungryAge+1 <= GEN_FOOD_FOXES){
+        else if(validPositions.size() > 0 && fox.hungryAge+1 < GEN_FOOD_FOXES){
 
             std::pair<int,int> posToMove = chooseMovePosition(currentGen,x,y,validPositions);
             int xToMove = posToMove.first;
@@ -328,14 +329,14 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
         }
 
-        else if(fox.hungryAge+1 <= GEN_FOOD_FOXES){
+        else if(fox.hungryAge+1 < GEN_FOOD_FOXES){
             Fox newFox = Fox(h+1, p+1, x, y);
             FoxSetTemp.insert(newFox);
             MatrixElement elNew = MatrixElement(ElementType::FOX);
             elNew.elem.fx = newFox;
             posMatrixTemp[x][y] = elNew;
         }
-        else if(fox.hungryAge+1 > GEN_FOOD_FOXES) {
+        else if(fox.hungryAge+1 == GEN_FOOD_FOXES) {
             posMatrixTemp[x][y] = MatrixElement(ElementType::EMPTY);
         }
 
@@ -352,8 +353,6 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 void simGen(int gen){
 
     prepareTempForRabbit();
-
-//    printMatrix(posMatrix, R,C);
 
     RabbitSet = analyzeRabbits(RabbitSet, gen);
 
@@ -376,8 +375,6 @@ void prepareTempForRabbit() {
             }
         }
     }
-//    printMatrix(posMatrixTemp, R,C);
-
 }
 
 void prepareTempForFox() {
@@ -389,8 +386,6 @@ void prepareTempForFox() {
             }
         }
     }
-//    printMatrix(posMatrixTemp, R,C);
-
 }
 
 
@@ -455,15 +450,15 @@ int main(int argc, char* argv[]) {
     }
 
     for(int gen=0; gen<N_GEN; gen++){
-        std::cout << "Geração: " << gen << std::endl;
-        printMatrix(posMatrix, R,C);
+//        std::cout << "Geração: " << gen << std::endl;
+//        printMatrix(posMatrix, R,C);
         simGen(gen);
     }
 
-    std::cout << "Geração: " << N_GEN << std::endl;
-    printMatrix(posMatrix, R, C);
+//    std::cout << "Geração: " << N_GEN << std::endl;
+//    printMatrix(posMatrix, R, C);
 
-//    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
+    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
     return 0;
 }
