@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <unordered_set>
-#include <cstring>
 #include <sys/timeb.h>
 #include "main.hpp"
 
@@ -10,7 +9,6 @@ MatrixElement** posMatrixTemp;
 
 MatrixElement* auxMatrix;
 MatrixElement* auxMatrixTemp;
-
 
 std::unordered_set<Rabbit> RabbitSet;
 std::unordered_set<Fox>    FoxSet;
@@ -468,22 +466,22 @@ int main(int argc, char* argv[]) {
 
     struct timeb start, end;
     int diff;
-    ftime(&start);
 
+    ftime(&start);
     for(int gen=0; gen<N_GEN; gen++){
-//        std::cout << "Geração: " << gen << std::endl;
+//        std::cout << "Generation " << gen << std::endl;
 //        printMatrix(posMatrix, R,C);
+//        std::cout << std::endl;
         simGen(gen);
     }
-
     ftime(&end);
-    diff = (int) (1000.0 * (end.time - start.time)
-                  + (end.millitm - start.millitm));
 
-    printf("\nOperation took %u milliseconds\n", diff);
-
-    std::cout << "Geração: " << N_GEN << std::endl;
+    std::cout << "Generation " << N_GEN << std::endl;
     printMatrix(posMatrix, R, C);
+    std::cout << std::endl;
+
+    diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
+    printf("Operation took %u milliseconds\n", diff);
 
     printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
