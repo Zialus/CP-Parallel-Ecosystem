@@ -6,6 +6,8 @@ matrix:
   include:
     - os : linux
       compiler: g++
+    - os : linux
+      compiler: clang++
     - os: osx
       before_install:
         - brew install cmake
