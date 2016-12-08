@@ -1,15 +1,27 @@
 language: cpp
 dist: trusty
-osx_image: xcode8.2
 
 matrix:
   include:
     - os : linux
       compiler: g++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
     - os : linux
       compiler: clang++
-    - os: osx
-      before_install:
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6      
+    - os: os
+        osx_image: xcode8.2
+        before_install:
         - brew install cmake
 
 script:
