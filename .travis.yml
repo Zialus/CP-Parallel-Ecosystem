@@ -20,7 +20,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-    - os: os
+    - os: osx
       osx_image: xcode8.2
       before_install:
         - brew install cmake
