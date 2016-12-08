@@ -1,5 +1,6 @@
 language: cpp
 dist: trusty
+sudo: required
 
 matrix:
   include:
@@ -18,7 +19,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6      
+            - g++-6
     - os: os
       osx_image: xcode8.2
       before_install:
