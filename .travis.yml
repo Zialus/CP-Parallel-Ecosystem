@@ -20,8 +20,8 @@ matrix:
           packages:
             - g++-6      
     - os: os
-        osx_image: xcode8.2
-        before_install:
+      osx_image: xcode8.2
+      before_install:
         - brew install cmake
 
 script:
