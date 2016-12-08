@@ -239,7 +239,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
                 RabbitSet.erase(posMatrixTemp[xToMove][yToMove].elem.rb);
 
 
-                if(fox.procAge >= GEN_PROC_FOXES){
+                if(p >= GEN_PROC_FOXES){
                     Fox fatherFox = Fox(0 ,0, xToMove, yToMove);
                     Fox babyFox = Fox(0, 0, x, y);
                     MatrixElement elFather = MatrixElement(ElementType::FOX);
@@ -263,17 +263,15 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             else if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX){
 
                 // delete the fox that was there
-//                FoxSet.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
 
-
-                if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
-                   ( fox.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                     && fox.hungryAge < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge) ){
+                if(p > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
+                   ( p == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                     && h < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge) ){
 
                     FoxSetTemp.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
 
                     if(fox.procAge >= GEN_PROC_FOXES){
-                        Fox fatherFox = Fox(h+1 ,0, xToMove, yToMove);
+                        Fox fatherFox = Fox(0 ,0, xToMove, yToMove);
                         Fox babyFox = Fox(0, 0, x, y);
                         MatrixElement elFather = MatrixElement(ElementType::FOX);
                         MatrixElement elBaby = MatrixElement(ElementType::FOX);
@@ -285,7 +283,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
                         FoxSetTemp.insert(babyFox);
                     }
                     else{
-                        Fox newFox = Fox(h+1, p+1, xToMove, yToMove);
+                        Fox newFox = Fox(0, p+1, xToMove, yToMove);
                         MatrixElement elNew = MatrixElement(ElementType::FOX);
                         elNew.elem.fx = newFox;
                         posMatrixTemp[xToMove][yToMove] = elNew;
@@ -369,14 +367,14 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
         }
 
-        else if(fox.hungryAge+1 < GEN_FOOD_FOXES){
+        else if(h+1 < GEN_FOOD_FOXES){
             Fox newFox = Fox(h+1, p+1, x, y);
             FoxSetTemp.insert(newFox);
             MatrixElement elNew = MatrixElement(ElementType::FOX);
             elNew.elem.fx = newFox;
             posMatrixTemp[x][y] = elNew;
         }
-        else if(fox.hungryAge+1 == GEN_FOOD_FOXES) {
+        else if(h+1 == GEN_FOOD_FOXES) {
             posMatrixTemp[x][y] = MatrixElement(ElementType::EMPTY);
         }
 
