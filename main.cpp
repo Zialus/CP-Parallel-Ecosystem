@@ -1,7 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <unordered_set>
+
+#include <string.h>
 #include <sys/timeb.h>
+
 #include "main.hpp"
 
 MatrixElement** posMatrix;
@@ -129,7 +132,7 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
 
     std::unordered_set<Rabbit> RabbitSetTemp;
 
-    for (const auto& rabbit: RabbitSet) {
+    for (auto rabbit: RabbitSet) {
 
         int x = rabbit.pos_x;
         int y = rabbit.pos_y;
@@ -215,7 +218,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
     std::unordered_set<Fox> FoxSetTemp;
 
-    for (const auto& fox: FoxSet) {
+    for (auto fox: FoxSet) {
 
         int x = fox.pos_x;
         int y = fox.pos_y;
@@ -231,6 +234,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             int yToMove = posToMove.second;
 
             if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT){
+
                 // delete the rabbit that was there
                 RabbitSet.erase(posMatrixTemp[xToMove][yToMove].elem.rb);
 
@@ -263,8 +267,8 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
 
                 if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
-                        ( fox.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                           && fox.hungryAge < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)){
+                   ( fox.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                     && fox.hungryAge < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge) ){
 
                     Fox newFox = Fox(0, p+1, xToMove, yToMove);
                     MatrixElement elNew = MatrixElement(ElementType::FOX);
@@ -310,11 +314,12 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
             }
 
-            //falta verificar se uma fox tem menos fome que a outra (se as suas procAge forem iguais)
             else if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX){
+
                 if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
                    ( fox.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                     && fox.hungryAge < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)){
+                     && fox.hungryAge < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge) ){
+
                     if(fox.procAge >= GEN_PROC_FOXES){
                         Fox fatherFox = Fox(h+1 ,0, xToMove, yToMove);
                         Fox babyFox = Fox(0, 0, x, y);

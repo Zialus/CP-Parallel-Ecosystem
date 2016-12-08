@@ -88,6 +88,7 @@ struct MatrixElement{
             case ROCK: return '*';
             case EMPTY: return ' ';
         }
+        return '?';
     }
 };
 
@@ -128,7 +129,7 @@ namespace std {
         size_t operator()(Rock const & rk) const noexcept
         {
             return (
-                    (3 + std::hash<int>()(rk.pos_y)) * 53 + std::hash<int>()(rk.pos_x)
+                    (53 + std::hash<int>()(rk.pos_y)) * 53 + std::hash<int>()(rk.pos_x)
             );
         }
     };
