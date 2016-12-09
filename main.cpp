@@ -287,6 +287,15 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
                         FoxSetTemp.insert(newFox);
                     }
 
+                } else {
+
+                    if(fox.procAge >= GEN_PROC_FOXES) {
+                        Fox babyFox = Fox(0, 0, x, y);
+                        MatrixElement elBaby = MatrixElement(ElementType::FOX);
+                        elBaby.elem.fx = babyFox;
+                        posMatrixTemp[x][y] = elBaby;
+                        FoxSetTemp.insert(babyFox);
+                    }
                 }
 
             } else {
@@ -348,6 +357,15 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
                         elNew.elem.fx = newFox;
                         posMatrixTemp[xToMove][yToMove] = elNew;
                         FoxSetTemp.insert(newFox);
+                    }
+                } else {
+
+                    if(fox.procAge >= GEN_PROC_FOXES) {
+                        Fox babyFox = Fox(0, 0, x, y);
+                        MatrixElement elBaby = MatrixElement(ElementType::FOX);
+                        elBaby.elem.fx = babyFox;
+                        posMatrixTemp[x][y] = elBaby;
+                        FoxSetTemp.insert(babyFox);
                     }
                 }
 
