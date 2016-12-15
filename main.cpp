@@ -136,17 +136,23 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
 
         int x = rabbit.pos_x;
         int y = rabbit.pos_y;
-
+        int p = rabbit.procAge;
         std::vector<char> validPositions = checkAdjacencies(posMatrix, x, y, ElementType::EMPTY);
 
+        rabbit.procAge +=1;
         if (validPositions.size() > 0) {
 
             std::pair<int, int> posToMove = chooseMovePosition(currentGen, x, y, validPositions);
             int xToMove = posToMove.first;
             int yToMove = posToMove.second;
 
+
+            bool canProc = rabbit.procAge > GEN_PROC_RABBITS;
+            if (canProc)
+                rabbit.procAge = 0;
+
             if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY) {
-                if (rabbit.procAge >= GEN_PROC_RABBITS) {
+                if (canProc) {
                     Rabbit fatherRabbit = Rabbit(0, xToMove, yToMove);
                     Rabbit babyRabbit = Rabbit(0, x, y);
                     MatrixElement elFather = MatrixElement(ElementType::RABBIT);
@@ -158,7 +164,7 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
                     RabbitSetTemp.insert(fatherRabbit);
                     RabbitSetTemp.insert(babyRabbit);
                 } else {
-                    Rabbit newRabbit = Rabbit(rabbit.procAge + 1, xToMove, yToMove);
+                    Rabbit newRabbit = Rabbit(rabbit.procAge, xToMove, yToMove);
                     MatrixElement elNew = MatrixElement(ElementType::RABBIT);
                     elNew.elem.rb = newRabbit;
                     posMatrixTemp[xToMove][yToMove] = elNew;
@@ -171,7 +177,7 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
                     // Delete the rabbit with worse ProcAge
                     RabbitSetTemp.erase(posMatrixTemp[xToMove][yToMove].elem.rb);
 
-                    if (rabbit.procAge >= GEN_PROC_RABBITS) {
+                    if (canProc) {
                         Rabbit fatherRabbit = Rabbit(0, xToMove, yToMove);
                         Rabbit babyRabbit = Rabbit(0, x, y);
                         MatrixElement elFather = MatrixElement(ElementType::RABBIT);
@@ -184,12 +190,20 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
                         RabbitSetTemp.insert(babyRabbit);
                     } else {
 
-                        Rabbit newRabbit = Rabbit(rabbit.procAge + 1, xToMove, yToMove);
+                        Rabbit newRabbit = Rabbit(rabbit.procAge, xToMove, yToMove);
                         MatrixElement elNew = MatrixElement(ElementType::RABBIT);
                         elNew.elem.rb = newRabbit;
                         posMatrixTemp[xToMove][yToMove] = elNew;
                         RabbitSetTemp.insert(newRabbit);
                     }
+                }
+
+                else if(canProc){
+                    Rabbit babyRabbit = Rabbit(0, x, y);
+                    MatrixElement elBaby = MatrixElement(ElementType::RABBIT);
+                    elBaby.elem.rb = babyRabbit;
+                    posMatrixTemp[x][y] = elBaby;
+                    RabbitSetTemp.insert(babyRabbit);
                 }
 
                 // else, he dies cuz he has a lower ProcAge
@@ -199,11 +213,9 @@ std::unordered_set<Rabbit> analyzeRabbits(std::unordered_set<Rabbit> RabbitSet, 
                 exit(1);
             }
 
-
         } else {
             // There's no valid Position to move into. Rabbit raises the ProcAge and doesn't move.
-            Rabbit newRabbit = Rabbit(rabbit.procAge + 1, x, y);
-
+            Rabbit newRabbit = Rabbit(rabbit.procAge, x, y);
             RabbitSetTemp.insert(newRabbit);
             MatrixElement elNew = MatrixElement(ElementType::RABBIT);
             elNew.elem.rb = newRabbit;
@@ -234,6 +246,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             int xToMove = posToMove.first;
             int yToMove = posToMove.second;
 
+
             if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT) {
 
                 // delete the rabbit that was there
@@ -261,11 +274,12 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             }
             else if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX) {
 
-                if(p > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
-                   ( p == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                     && h < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge) ) {
+                if(p+1 > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
+                   ( p+1 == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                     && h+1 < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge) ) {
 
                     // delete the fox that was there
+
                     FoxSetTemp.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
 
                     if(fox.procAge >= GEN_PROC_FOXES) {
@@ -333,11 +347,12 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
 
             } else if(posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX) {
 
-                if(fox.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
-                   ( fox.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                     && fox.hungryAge < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge) ){
+                if(fox.procAge+1 > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
+                   ( fox.procAge+1 == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                     && fox.hungryAge+1 < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge) ){
 
                     // delete the fox that was there
+
                     FoxSetTemp.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
 
                     if(fox.procAge >= GEN_PROC_FOXES) {
@@ -375,7 +390,6 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             }
 
         } else if(h+1 < GEN_FOOD_FOXES) {
-
             // There's no valid Position to move into. Fox raises its ProcAge and doesn't move.
             Fox newFox = Fox(h+1, p+1, x, y);
 
@@ -384,7 +398,7 @@ std::unordered_set<Fox> analyzeFoxes(std::unordered_set<Fox> FoxSet, int current
             elNew.elem.fx = newFox;
             posMatrixTemp[x][y] = elNew;
 
-        } else if(h+1 == GEN_FOOD_FOXES) {
+        } else if(h+1 >= GEN_FOOD_FOXES) {
             posMatrixTemp[x][y] = MatrixElement(ElementType::EMPTY);
         } else {
             perror("analyzeFoxes was used improperly - the fox should have been dead already");
@@ -501,16 +515,16 @@ int main(int argc, char* argv[]) {
 
     ftime(&start);
     for(int gen=0; gen<N_GEN; gen++){
-        std::cout << "Generation " << gen << std::endl;
-        printMatrix(posMatrix, R,C);
-        std::cout << std::endl;
+//        std::cout << "Generation " << gen << std::endl;
+//        printMatrix(posMatrix, R,C);
+//        std::cout << std::endl;
         simGen(gen);
     }
     ftime(&end);
 
-    std::cout << "Generation " << N_GEN << std::endl;
-    printMatrix(posMatrix, R, C);
-    std::cout << std::endl;
+//    std::cout << "Generation " << N_GEN << std::endl;
+//    printMatrix(posMatrix, R, C);
+//    std::cout << std::endl;
 
     diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
     printf("Operation took %u milliseconds\n", diff);
