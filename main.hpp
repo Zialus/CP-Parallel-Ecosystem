@@ -135,7 +135,5 @@ namespace std {
     };
 }
 
-
 void prepareTempForRabbit();
 void prepareTempForFox();
-
