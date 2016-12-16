@@ -36,6 +36,8 @@ matrix:
         - brew link --overwrite llvm --force
         - export CC=clang
         - export CXX=clang++
+  allow_failures:
+  - compiler: clang++
 
 script:
   - mkdir build
