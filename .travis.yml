@@ -20,13 +20,19 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
+      before_install:
+      - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+      - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main"
+      - sudo add-apt-repository ppa:mc3man/trusty-media -y
+      - sudo apt-get update -y
+      - sudo apt-get install clang-3.9
     - os: osx
       osx_image: xcode8.2
       before_install:
         - brew install cmake
         - brew install llvm
         - brew link --overwrite llvm --force
-        - export C=clang
+        - export CC=clang
         - export CXX=clang++
 
 script:
