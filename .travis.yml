@@ -26,6 +26,8 @@ matrix:
       - sudo add-apt-repository ppa:mc3man/trusty-media -y
       - sudo apt-get update -y
       - sudo apt-get install clang-3.9
+      - export CC=clang++-3.9
+      - export CXX=clang-3.9
     - os: osx
       osx_image: xcode8.2
       before_install:
