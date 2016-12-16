@@ -25,11 +25,13 @@ matrix:
       before_install:
         - brew install cmake
         - brew install llvm
-        - brew link llvm --force
+        - brew link --overwrite llvm --force
+        - export C=clang
+        - export CXX=clang++
 
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+  - cmake ..
   - make
   - ctest
