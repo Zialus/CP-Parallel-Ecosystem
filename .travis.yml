@@ -24,9 +24,12 @@ matrix:
       osx_image: xcode8.2
       before_install:
         - brew install cmake
+        - brew install llvm
+        - brew link llvm --force
 
 script:
   - mkdir build
   - cd build
-  - cmake .. && make
+  - cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+  - make
   - ctest
