@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(cp_rabits_and_foxes)
 
-set(CMAKE_VERBOSE_MAKEFILE true)
+#set(CMAKE_VERBOSE_MAKEFILE true)
 
 set(CMAKE_CXX_STANDARD 14)
 
