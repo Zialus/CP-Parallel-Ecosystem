@@ -523,7 +523,7 @@ int main(int argc, char* argv[]) {
     diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
     printf("Operation took %u milliseconds\n", diff);
 
-    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
+//    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
     return 0;
 }
