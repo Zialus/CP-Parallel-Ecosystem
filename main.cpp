@@ -13,9 +13,9 @@ MatrixElement** posMatrixTemp;
 MatrixElement* auxMatrix;
 MatrixElement* auxMatrixTemp;
 
-std::unordered_set<Rabbit> RabbitSet;
-std::unordered_set<Fox>    FoxSet;
-std::unordered_set<Rock>   RockSet;
+//std::unordered_set<Rabbit> RabbitSet;
+//std::unordered_set<Fox>    FoxSet;
+//std::unordered_set<Rock>   RockSet;
 
 int GEN_PROC_RABBITS ; // number of generations until a rabbit can procreate
 int GEN_PROC_FOXES ; // number of generations until a fox can procreate
@@ -43,17 +43,17 @@ void printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBIT
 
     printf("%d %d %d %d %d %d %d\n", GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES, 0, R, C, counter);
 
-    for (int i = 0; i < R; i++) {
-        for (int j = 0; j < C; j++){
-            if (matrix[i][j].element_type == ElementType::RABBIT) {
-                printf("RABBIT %d %d\n", i, j);
-            } else if (matrix[i][j].element_type == ElementType::FOX) {
-                printf("FOX %d %d\n", i, j);
-            } else if (matrix[i][j].element_type == ElementType::ROCK) {
-                printf("ROCK %d %d\n", i, j);
-            }
-        }
-    }
+//    for (int i = 0; i < R; i++) {
+//        for (int j = 0; j < C; j++){
+//            if (matrix[i][j].element_type == ElementType::RABBIT) {
+//                printf("RABBIT %d %d\n", i, j);
+//            } else if (matrix[i][j].element_type == ElementType::FOX) {
+//                printf("FOX %d %d\n", i, j);
+//            } else if (matrix[i][j].element_type == ElementType::ROCK) {
+//                printf("ROCK %d %d\n", i, j);
+//            }
+//        }
+//    }
 
 }
 
@@ -231,7 +231,7 @@ void analyzeFoxes(int currentGen){
         for (int y = 0; y < C; y++) {
             if (posMatrix[x][y].element_type == ElementType::FOX) {
                 Fox fox = posMatrix[x][y].elem.fx;
-                Fox foxTemp = Fox(fox.hungryAge, fox.procAge, x,y);
+                Fox foxTemp = Fox(fox.hungryAge, fox.procAge+1, x,y);
 
                 std::vector<char> validPositionsWithRabbits = checkAdjacencies(posMatrix, x, y, ElementType::RABBIT);
                 std::vector<char> validPositions = checkAdjacencies(posMatrix, x, y, ElementType::EMPTY);
@@ -242,12 +242,16 @@ void analyzeFoxes(int currentGen){
                     int yToMove = posToMove.second;
 
 
+                    bool canProc = foxTemp.procAge > GEN_PROC_FOXES;
+                    if (canProc)
+                        foxTemp.procAge = 0;
+
                     if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT) {
 
                         // delete the rabbit that was there
 //                        RabbitSet.erase(posMatrixTemp[xToMove][yToMove].elem.rb);
 
-                        if (foxTemp.procAge >= GEN_PROC_FOXES) {
+                        if (canProc) {
                             Fox fatherFox = Fox(0, 0, xToMove, yToMove);
                             Fox babyFox = Fox(0, 0, x, y);
                             MatrixElement elFather = MatrixElement(ElementType::FOX);
@@ -259,7 +263,7 @@ void analyzeFoxes(int currentGen){
 //                            FoxSetTemp.insert(fatherFox);
 //                            FoxSetTemp.insert(babyFox);
                         } else {
-                            Fox newFox = Fox(0, foxTemp.procAge + 1, xToMove, yToMove);
+                            Fox newFox = Fox(0, foxTemp.procAge, xToMove, yToMove);
                             MatrixElement elNew = MatrixElement(ElementType::FOX);
                             elNew.elem.fx = newFox;
                             posMatrixTemp[xToMove][yToMove] = elNew;
@@ -268,15 +272,15 @@ void analyzeFoxes(int currentGen){
 
                     } else if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX) {
 
-                        if (foxTemp.procAge + 1 > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
-                            (foxTemp.procAge + 1 == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                             && foxTemp.hungryAge + 1 < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)) {
+                        if (foxTemp.procAge  > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
+                            (foxTemp.procAge  == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                             && foxTemp.hungryAge+1  < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)) {
 
                             // delete the fox that was there
 
 //                            FoxSetTemp.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
 
-                            if (foxTemp.procAge >= GEN_PROC_FOXES) {
+                            if (canProc) {
                                 Fox fatherFox = Fox(0, 0, xToMove, yToMove);
                                 Fox babyFox = Fox(0, 0, x, y);
                                 MatrixElement elFather = MatrixElement(ElementType::FOX);
@@ -288,7 +292,7 @@ void analyzeFoxes(int currentGen){
 //                                FoxSetTemp.insert(fatherFox);
 //                                FoxSetTemp.insert(babyFox);
                             } else {
-                                Fox newFox = Fox(0, foxTemp.procAge + 1, xToMove, yToMove);
+                                Fox newFox = Fox(0, foxTemp.procAge , xToMove, yToMove);
                                 MatrixElement elNew = MatrixElement(ElementType::FOX);
                                 elNew.elem.fx = newFox;
                                 posMatrixTemp[xToMove][yToMove] = elNew;
@@ -297,7 +301,7 @@ void analyzeFoxes(int currentGen){
 
                         } else {
 
-                            if (foxTemp.procAge >= GEN_PROC_FOXES) {
+                            if (canProc) {
                                 Fox babyFox = Fox(0, 0, x, y);
                                 MatrixElement elBaby = MatrixElement(ElementType::FOX);
                                 elBaby.elem.fx = babyFox;
@@ -312,7 +316,11 @@ void analyzeFoxes(int currentGen){
                     }
 
 
-                } else if (validPositions.size() > 0 && fox.hungryAge + 1 < GEN_FOOD_FOXES) {
+                } else if (validPositions.size() > 0 && fox.hungryAge+1 < GEN_FOOD_FOXES) {
+
+                    bool canProc = foxTemp.procAge > GEN_PROC_FOXES;
+                    if (canProc)
+                        foxTemp.procAge = 0;
 
                     std::pair<int, int> posToMove = chooseMovePosition(currentGen, x, y, validPositions);
                     int xToMove = posToMove.first;
@@ -320,8 +328,8 @@ void analyzeFoxes(int currentGen){
 
                     if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY) {
 
-                        if (foxTemp.procAge >= GEN_PROC_FOXES) {
-                            Fox fatherFox = Fox(foxTemp.hungryAge + 1, 0, xToMove, yToMove);
+                        if (canProc){
+                            Fox fatherFox = Fox(foxTemp.hungryAge+1, 0, xToMove, yToMove);
                             Fox babyFox = Fox(0, 0, x, y);
                             MatrixElement elFather = MatrixElement(ElementType::FOX);
                             MatrixElement elBaby = MatrixElement(ElementType::FOX);
@@ -332,7 +340,7 @@ void analyzeFoxes(int currentGen){
 //                            FoxSetTemp.insert(fatherFox);
 //                            FoxSetTemp.insert(babyFox);
                         } else {
-                            Fox newFox = Fox(foxTemp.hungryAge + 1, foxTemp.procAge + 1, xToMove, yToMove);
+                            Fox newFox = Fox(foxTemp.hungryAge+1, foxTemp.procAge, xToMove, yToMove);
                             MatrixElement elNew = MatrixElement(ElementType::FOX);
                             elNew.elem.fx = newFox;
                             posMatrixTemp[xToMove][yToMove] = elNew;
@@ -341,16 +349,16 @@ void analyzeFoxes(int currentGen){
 
                     } else if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX) {
 
-                        if (foxTemp.procAge + 1 > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
-                            (foxTemp.procAge + 1 == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                             && foxTemp.hungryAge + 1 < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)) {
+                        if (foxTemp.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
+                            (foxTemp.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                             && foxTemp.hungryAge +1 < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)) {
 
                             // delete the fox that was there
 
 //                            FoxSetTemp.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
 
-                            if (foxTemp.procAge >= GEN_PROC_FOXES) {
-                                Fox fatherFox = Fox(foxTemp.hungryAge + 1, 0, xToMove, yToMove);
+                            if (canProc) {
+                                Fox fatherFox = Fox(foxTemp.hungryAge +1 , 0, xToMove, yToMove);
                                 Fox babyFox = Fox(0, 0, x, y);
                                 MatrixElement elFather = MatrixElement(ElementType::FOX);
                                 MatrixElement elBaby = MatrixElement(ElementType::FOX);
@@ -361,7 +369,7 @@ void analyzeFoxes(int currentGen){
 //                                FoxSetTemp.insert(fatherFox);
 //                                FoxSetTemp.insert(babyFox);
                             } else {
-                                Fox newFox = Fox(foxTemp.hungryAge + 1, foxTemp.procAge + 1, xToMove, yToMove);
+                                Fox newFox = Fox(foxTemp.hungryAge +1, foxTemp.procAge , xToMove, yToMove);
                                 MatrixElement elNew = MatrixElement(ElementType::FOX);
                                 elNew.elem.fx = newFox;
                                 posMatrixTemp[xToMove][yToMove] = elNew;
@@ -369,7 +377,7 @@ void analyzeFoxes(int currentGen){
                             }
                         } else {
 
-                            if (foxTemp.procAge >= GEN_PROC_FOXES) {
+                            if (canProc) {
                                 Fox babyFox = Fox(0, 0, x, y);
                                 MatrixElement elBaby = MatrixElement(ElementType::FOX);
                                 elBaby.elem.fx = babyFox;
@@ -383,16 +391,16 @@ void analyzeFoxes(int currentGen){
                         exit(1);
                     }
 
-                } else if (foxTemp.hungryAge + 1 < GEN_FOOD_FOXES) {
+                } else if (foxTemp.hungryAge +1 < GEN_FOOD_FOXES) {
                     // There's no valid Position to move into. Fox raises its ProcAge and doesn't move.
-                    Fox newFox = Fox(foxTemp.hungryAge + 1, foxTemp.procAge + 1, x, y);
+                    Fox newFox = Fox(foxTemp.hungryAge +1 , foxTemp.procAge , x, y);
 
 //                    FoxSetTemp.insert(newFox);
                     MatrixElement elNew = MatrixElement(ElementType::FOX);
                     elNew.elem.fx = newFox;
                     posMatrixTemp[x][y] = elNew;
 
-                } else if (foxTemp.hungryAge + 1 >= GEN_FOOD_FOXES) {
+                } else if (foxTemp.hungryAge +1 >= GEN_FOOD_FOXES) {
                     posMatrixTemp[x][y] = MatrixElement(ElementType::EMPTY);
                 } else {
                     perror("analyzeFoxes was used improperly - the fox should have been dead already");
@@ -523,7 +531,7 @@ int main(int argc, char* argv[]) {
     diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
     printf("Operation took %u milliseconds\n", diff);
 
-//    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
+    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
     return 0;
 }
