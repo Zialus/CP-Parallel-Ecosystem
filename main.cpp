@@ -25,7 +25,7 @@ int N ; // number of objects in the initial ecosystem
 bool PRINT_FINAL_INFO;
 bool PRINT_TIME;
 bool PRINT_ALLGENS;
-int NTHREADS;
+int NTHREADS = -1;
 
 void printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES){
 
@@ -633,8 +633,9 @@ int main(int argc, char* argv[]) {
 
     ftime(&start);
 
-
-    omp_set_num_threads(NTHREADS);
+    if(NTHREADS != -1) {
+        omp_set_num_threads(NTHREADS);
+    }
 
     for (int gen = 0; gen < N_GEN; gen++) {
 //        std::cout << "Generation " << gen << std::endl;
