@@ -1,21 +1,18 @@
 #include <iostream>
 #include <vector>
-#include <unordered_set>
-
 #include <string.h>
 #include <sys/timeb.h>
-
+#include <omp.h>
 #include "main.hpp"
 
 MatrixElement** posMatrix;
+MatrixElement* posMatrixAux;
+
 MatrixElement** posMatrixTemp;
+MatrixElement* posMatrixTempAux;
 
-MatrixElement* auxMatrix;
-MatrixElement* auxMatrixTemp;
-
-//std::unordered_set<Rabbit> RabbitSet;
-//std::unordered_set<Fox>    FoxSet;
-//std::unordered_set<Rock>   RockSet;
+omp_lock_t** lockMatrix;
+omp_lock_t* lockMatrixAux;
 
 int GEN_PROC_RABBITS ; // number of generations until a rabbit can procreate
 int GEN_PROC_FOXES ; // number of generations until a fox can procreate
@@ -136,7 +133,7 @@ std::pair<int,int> chooseMovePosition(int currentGen, int xPos, int yPos, std::v
 };
 
 void analyzeRabbits(int currentGen) {
-
+#pragma omp parallel for schedule(static)
     for (int x = 0; x < R; x++) {
         for (int y = 0; y < C; y++) {
             if (posMatrix[x][y].element_type == ElementType::RABBIT) {
@@ -154,6 +151,7 @@ void analyzeRabbits(int currentGen) {
                     if (canProc)
                         rabbitTemp.procAge = 0;
 
+                    omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                     if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY) {
 
                         if (canProc) {
@@ -163,23 +161,30 @@ void analyzeRabbits(int currentGen) {
                             MatrixElement elBaby = MatrixElement(ElementType::RABBIT);
                             elFather.elem.rb = fatherRabbit;
                             elBaby.elem.rb = babyRabbit;
+
+                            omp_set_lock(&(lockMatrix[x][y]));
                             posMatrixTemp[x][y] = elBaby;
+                            omp_unset_lock(&(lockMatrix[x][y]));
+
+//                            omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                             posMatrixTemp[xToMove][yToMove] = elFather;
-//                            RabbitSetTemp.insert(fatherRabbit);
-//                            RabbitSetTemp.insert(babyRabbit);
+//                            omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
+
                         } else {
                             Rabbit newRabbit = Rabbit(rabbitTemp.procAge, xToMove, yToMove);
                             MatrixElement elNew = MatrixElement(ElementType::RABBIT);
                             elNew.elem.rb = newRabbit;
+
+//                            omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                             posMatrixTemp[xToMove][yToMove] = elNew;
-//                            RabbitSetTemp.insert(newRabbit);
+//                            omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                         }
 
                     } else if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT) {
                         if (rabbitTemp.procAge > posMatrixTemp[xToMove][yToMove].elem.rb.procAge) {
 
-                            // Delete the rabbit with worse ProcAge
-//                            RabbitSetTemp.erase(posMatrixTemp[xToMove][yToMove].elem.rb);
 
                             if (canProc) {
                                 Rabbit fatherRabbit = Rabbit(0, xToMove, yToMove);
@@ -188,24 +193,33 @@ void analyzeRabbits(int currentGen) {
                                 MatrixElement elBaby = MatrixElement(ElementType::RABBIT);
                                 elFather.elem.rb = fatherRabbit;
                                 elBaby.elem.rb = babyRabbit;
+
+                                omp_set_lock(&(lockMatrix[x][y]));
                                 posMatrixTemp[x][y] = elBaby;
+                                omp_unset_lock(&(lockMatrix[x][y]));
+
+//                                omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                                 posMatrixTemp[xToMove][yToMove] = elFather;
-//                                RabbitSetTemp.insert(fatherRabbit);
-//                                RabbitSetTemp.insert(babyRabbit);
+//                                omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
                             } else {
 
                                 Rabbit newRabbit = Rabbit(rabbitTemp.procAge, xToMove, yToMove);
                                 MatrixElement elNew = MatrixElement(ElementType::RABBIT);
                                 elNew.elem.rb = newRabbit;
+
+//                                omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                                 posMatrixTemp[xToMove][yToMove] = elNew;
-//                                RabbitSetTemp.insert(newRabbit);
+//                                omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                             }
                         } else if (canProc) {
                             Rabbit babyRabbit = Rabbit(0, x, y);
                             MatrixElement elBaby = MatrixElement(ElementType::RABBIT);
                             elBaby.elem.rb = babyRabbit;
+
+                            omp_set_lock(&(lockMatrix[x][y]));
                             posMatrixTemp[x][y] = elBaby;
-//                            RabbitSetTemp.insert(babyRabbit);
+                            omp_unset_lock(&(lockMatrix[x][y]));
                         }
 
                         // else, he dies cuz he has a lower ProcAge
@@ -215,13 +229,18 @@ void analyzeRabbits(int currentGen) {
                         exit(1);
                     }
 
+                    omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                 } else {
                     // There's no valid Position to move into. Rabbit raises the ProcAge and doesn't move.
                     Rabbit newRabbit = Rabbit(rabbitTemp.procAge, x, y);
-//                    RabbitSetTemp.insert(newRabbit);
                     MatrixElement elNew = MatrixElement(ElementType::RABBIT);
                     elNew.elem.rb = newRabbit;
+
+                    omp_set_lock(&(lockMatrix[x][y]));
                     posMatrixTemp[x][y] = elNew;
+                    omp_unset_lock(&(lockMatrix[x][y]));
+
                 }
 
             }
@@ -231,9 +250,8 @@ void analyzeRabbits(int currentGen) {
 }
 
 void analyzeFoxes(int currentGen){
-
-//    std::unordered_set<Fox> FoxSetTemp;
-
+// schedule(static)
+#pragma omp parallel for schedule(static)
     for (int x = 0; x < R; x++) {
         for (int y = 0; y < C; y++) {
             if (posMatrix[x][y].element_type == ElementType::FOX) {
@@ -253,10 +271,8 @@ void analyzeFoxes(int currentGen){
                     if (canProc)
                         foxTemp.procAge = 0;
 
+                    omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                     if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT) {
-
-                        // delete the rabbit that was there
-//                        RabbitSet.erase(posMatrixTemp[xToMove][yToMove].elem.rb);
 
                         if (canProc) {
                             Fox fatherFox = Fox(0, 0, xToMove, yToMove);
@@ -265,16 +281,23 @@ void analyzeFoxes(int currentGen){
                             MatrixElement elBaby = MatrixElement(ElementType::FOX);
                             elFather.elem.fx = fatherFox;
                             elBaby.elem.fx = babyFox;
+
+                            omp_set_lock(&(lockMatrix[x][y]));
                             posMatrixTemp[x][y] = elBaby;
+                            omp_unset_lock(&(lockMatrix[x][y]));
+
+//                            omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                             posMatrixTemp[xToMove][yToMove] = elFather;
-//                            FoxSetTemp.insert(fatherFox);
-//                            FoxSetTemp.insert(babyFox);
+//                            omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                         } else {
                             Fox newFox = Fox(0, foxTemp.procAge, xToMove, yToMove);
                             MatrixElement elNew = MatrixElement(ElementType::FOX);
                             elNew.elem.fx = newFox;
+
+//                            omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                             posMatrixTemp[xToMove][yToMove] = elNew;
-//                            FoxSetTemp.insert(newFox);
+//                            omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
                         }
 
                     } else if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX) {
@@ -285,8 +308,6 @@ void analyzeFoxes(int currentGen){
 
                             // delete the fox that was there
 
-//                            FoxSetTemp.erase(posMatrixTemp[xToMove][yToMove].elem.fx);
-
                             if (canProc) {
                                 Fox fatherFox = Fox(0, 0, xToMove, yToMove);
                                 Fox babyFox = Fox(0, 0, x, y);
@@ -294,16 +315,23 @@ void analyzeFoxes(int currentGen){
                                 MatrixElement elBaby = MatrixElement(ElementType::FOX);
                                 elFather.elem.fx = fatherFox;
                                 elBaby.elem.fx = babyFox;
+
+                                omp_set_lock(&(lockMatrix[x][y]));
                                 posMatrixTemp[x][y] = elBaby;
+                                omp_unset_lock(&(lockMatrix[x][y]));
+
+//                                omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                                 posMatrixTemp[xToMove][yToMove] = elFather;
-//                                FoxSetTemp.insert(fatherFox);
-//                                FoxSetTemp.insert(babyFox);
+//                                omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
                             } else {
                                 Fox newFox = Fox(0, foxTemp.procAge , xToMove, yToMove);
                                 MatrixElement elNew = MatrixElement(ElementType::FOX);
                                 elNew.elem.fx = newFox;
+
+//                                omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                                 posMatrixTemp[xToMove][yToMove] = elNew;
-//                                FoxSetTemp.insert(newFox);
+//                                omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                             }
 
                         } else {
@@ -312,8 +340,11 @@ void analyzeFoxes(int currentGen){
                                 Fox babyFox = Fox(0, 0, x, y);
                                 MatrixElement elBaby = MatrixElement(ElementType::FOX);
                                 elBaby.elem.fx = babyFox;
+
+                                omp_set_lock(&(lockMatrix[x][y]));
                                 posMatrixTemp[x][y] = elBaby;
-//                                FoxSetTemp.insert(babyFox);
+                                omp_unset_lock(&(lockMatrix[x][y]));
+
                             }
                         }
 
@@ -321,6 +352,8 @@ void analyzeFoxes(int currentGen){
                         perror("analyzeFoxes was used improperly - you are trying to move into a rock");
                         exit(1);
                     }
+
+                    omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
 
 
                 } else if (validPositions.size() > 0 && fox.hungryAge+1 < GEN_FOOD_FOXES) {
@@ -333,6 +366,7 @@ void analyzeFoxes(int currentGen){
                     int xToMove = posToMove.first;
                     int yToMove = posToMove.second;
 
+                    omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                     if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY) {
 
                         if (canProc){
@@ -342,16 +376,25 @@ void analyzeFoxes(int currentGen){
                             MatrixElement elBaby = MatrixElement(ElementType::FOX);
                             elFather.elem.fx = fatherFox;
                             elBaby.elem.fx = babyFox;
+
+                            omp_set_lock(&(lockMatrix[x][y]));
                             posMatrixTemp[x][y] = elBaby;
+                            omp_unset_lock(&(lockMatrix[x][y]));
+
+//                            omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                             posMatrixTemp[xToMove][yToMove] = elFather;
-//                            FoxSetTemp.insert(fatherFox);
-//                            FoxSetTemp.insert(babyFox);
+//                            omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
+
                         } else {
                             Fox newFox = Fox(foxTemp.hungryAge+1, foxTemp.procAge, xToMove, yToMove);
                             MatrixElement elNew = MatrixElement(ElementType::FOX);
                             elNew.elem.fx = newFox;
+
+//                            omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                             posMatrixTemp[xToMove][yToMove] = elNew;
-//                            FoxSetTemp.insert(newFox);
+//                            omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                         }
 
                     } else if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX) {
@@ -371,16 +414,24 @@ void analyzeFoxes(int currentGen){
                                 MatrixElement elBaby = MatrixElement(ElementType::FOX);
                                 elFather.elem.fx = fatherFox;
                                 elBaby.elem.fx = babyFox;
+
+                                omp_set_lock(&(lockMatrix[x][y]));
                                 posMatrixTemp[x][y] = elBaby;
+                                omp_unset_lock(&(lockMatrix[x][y]));
+
+//                                omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                                 posMatrixTemp[xToMove][yToMove] = elFather;
-//                                FoxSetTemp.insert(fatherFox);
-//                                FoxSetTemp.insert(babyFox);
+//                                omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                             } else {
                                 Fox newFox = Fox(foxTemp.hungryAge +1, foxTemp.procAge , xToMove, yToMove);
                                 MatrixElement elNew = MatrixElement(ElementType::FOX);
                                 elNew.elem.fx = newFox;
+
+//                                omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                                 posMatrixTemp[xToMove][yToMove] = elNew;
-//                                FoxSetTemp.insert(newFox);
+//                                omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                             }
                         } else {
 
@@ -388,8 +439,10 @@ void analyzeFoxes(int currentGen){
                                 Fox babyFox = Fox(0, 0, x, y);
                                 MatrixElement elBaby = MatrixElement(ElementType::FOX);
                                 elBaby.elem.fx = babyFox;
+
+                                omp_set_lock(&(lockMatrix[x][y]));
                                 posMatrixTemp[x][y] = elBaby;
-//                                FoxSetTemp.insert(babyFox);
+                                omp_unset_lock(&(lockMatrix[x][y]));
                             }
                         }
 
@@ -398,17 +451,23 @@ void analyzeFoxes(int currentGen){
                         exit(1);
                     }
 
+                    omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
+
                 } else if (foxTemp.hungryAge +1 < GEN_FOOD_FOXES) {
                     // There's no valid Position to move into. Fox raises its ProcAge and doesn't move.
                     Fox newFox = Fox(foxTemp.hungryAge +1 , foxTemp.procAge , x, y);
 
-//                    FoxSetTemp.insert(newFox);
                     MatrixElement elNew = MatrixElement(ElementType::FOX);
                     elNew.elem.fx = newFox;
+
+                    omp_set_lock(&(lockMatrix[x][y]));
                     posMatrixTemp[x][y] = elNew;
+                    omp_unset_lock(&(lockMatrix[x][y]));
 
                 } else if (foxTemp.hungryAge +1 >= GEN_FOOD_FOXES) {
+                    omp_set_lock(&(lockMatrix[x][y]));
                     posMatrixTemp[x][y] = MatrixElement(ElementType::EMPTY);
+                    omp_unset_lock(&(lockMatrix[x][y]));
                 } else {
                     perror("analyzeFoxes was used improperly - the fox should have been dead already");
                     exit(1);
@@ -430,11 +489,11 @@ void simGen(int gen){
 
     analyzeFoxes(gen);
 
-    memcpy(auxMatrix, auxMatrixTemp, R*C*sizeof(MatrixElement));
+    memcpy(posMatrixAux, posMatrixTempAux, R*C*sizeof(MatrixElement));
 }
 
 void prepareTempForRabbit() {
-    memcpy(auxMatrixTemp, auxMatrix, sizeof(MatrixElement)*R*C);
+    memcpy(posMatrixTempAux, posMatrixAux, sizeof(MatrixElement)*R*C);
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
@@ -446,7 +505,7 @@ void prepareTempForRabbit() {
 }
 
 void prepareTempForFox() {
-    memcpy(auxMatrix, auxMatrixTemp, R*C*sizeof(MatrixElement));
+    memcpy(posMatrixAux, posMatrixTempAux, R*C*sizeof(MatrixElement));
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
@@ -472,13 +531,24 @@ void read_input() {
     std::cin >> GEN_PROC_RABBITS >> GEN_PROC_FOXES >> GEN_FOOD_FOXES >> N_GEN >> R >> C >> N;
 
     posMatrix = new MatrixElement*[R];
-    auxMatrix = new MatrixElement[R*C];
+    posMatrixAux = new MatrixElement[R*C];
+
     posMatrixTemp = new MatrixElement*[R];
-    auxMatrixTemp = new MatrixElement[R*C];
+    posMatrixTempAux = new MatrixElement[R*C];
+
+    lockMatrix = new omp_lock_t*[R];
+    lockMatrixAux = new omp_lock_t[R*C];
 
     for (int i = 0; i < R; ++i) {
-        posMatrix[i] = &auxMatrix[i*C];
-        posMatrixTemp[i] = &auxMatrixTemp[i*C];
+        posMatrix[i] = &posMatrixAux[i*C];
+        posMatrixTemp[i] = &posMatrixTempAux[i*C];
+        lockMatrix[i] = &lockMatrixAux[i*C];
+    }
+
+    for (int i=0; i<R; i++) {
+        for(int j=0; j<C; j++){
+            omp_init_lock(&(lockMatrix[i][j]));
+        }
     }
 
     for (int i = 0; i < R; ++i) {
@@ -562,7 +632,11 @@ int main(int argc, char* argv[]) {
     int diff;
 
     ftime(&start);
-    for(int gen=0; gen<N_GEN; gen++){
+
+
+    omp_set_num_threads(NTHREADS);
+
+    for (int gen = 0; gen < N_GEN; gen++) {
 //        std::cout << "Generation " << gen << std::endl;
 //        printMatrix(posMatrix, R,C);
 //        std::cout << std::endl;
