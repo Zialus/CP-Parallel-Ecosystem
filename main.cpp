@@ -25,6 +25,11 @@ int R ; // number of rows of the matrix representing the ecosystem
 int C ; // number of columns of the matrix representing the ecosystem
 int N ; // number of objects in the initial ecosystem
 
+bool PRINT_FINAL_INFO;
+bool PRINT_TIME;
+bool PRINT_ALLGENS;
+int NTHREADS;
+
 void printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES){
 
     int counter = 0;
@@ -43,17 +48,19 @@ void printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBIT
 
     printf("%d %d %d %d %d %d %d\n", GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES, 0, R, C, counter);
 
-//    for (int i = 0; i < R; i++) {
-//        for (int j = 0; j < C; j++){
-//            if (matrix[i][j].element_type == ElementType::RABBIT) {
-//                printf("RABBIT %d %d\n", i, j);
-//            } else if (matrix[i][j].element_type == ElementType::FOX) {
-//                printf("FOX %d %d\n", i, j);
-//            } else if (matrix[i][j].element_type == ElementType::ROCK) {
-//                printf("ROCK %d %d\n", i, j);
-//            }
-//        }
-//    }
+    if (PRINT_FINAL_INFO) {
+        for (int i = 0; i < R; i++) {
+            for (int j = 0; j < C; j++) {
+                if (matrix[i][j].element_type == ElementType::RABBIT) {
+                    printf("RABBIT %d %d\n", i, j);
+                } else if (matrix[i][j].element_type == ElementType::FOX) {
+                    printf("FOX %d %d\n", i, j);
+                } else if (matrix[i][j].element_type == ElementType::ROCK) {
+                    printf("ROCK %d %d\n", i, j);
+                }
+            }
+        }
+    }
 
 }
 
@@ -450,12 +457,18 @@ void prepareTempForFox() {
     }
 }
 
-int main(int argc, char* argv[]) {
+void print_help() {
+    printf("usage:\n\tsim -np <np> [arguments]\n\n"
+                   "Available arguments:\n"
+                   "\t-h\t\tdisplay this help file\n"
+                   "\t-np <np>\t\tuse <np> threads\n"
+                   "\t-f <filename>\t\tuse <filename> as input\n"
+                   "\t-pf\t\tprint final info\n"
+                   "\t-pt\t\tprint computation time\n"
+                   "\t-v\t\tverbose mode (print all generations)\n");
+}
 
-    if (argc == 2){
-        freopen(argv[1], "r", stdin);
-    }
-
+void read_input() {
     std::cin >> GEN_PROC_RABBITS >> GEN_PROC_FOXES >> GEN_FOOD_FOXES >> N_GEN >> R >> C >> N;
 
     posMatrix = new MatrixElement*[R];
@@ -511,6 +524,39 @@ int main(int argc, char* argv[]) {
             std::cout << "YOU FUCKED UP" << std::endl;
         }
     }
+}
+
+void parse_arguments(int argc, char* argv[]){
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-f") == 0) {
+            freopen(argv[i+1], "r", stdin);
+            i++;
+        } else if (strcmp(argv[i], "-v") == 0) {
+            PRINT_ALLGENS = 1;
+        } else if (strcmp(argv[i], "-pf") == 0) {
+            PRINT_FINAL_INFO = 1;
+        } else if (strcmp(argv[i], "-pt") == 0) {
+            PRINT_TIME = 1;
+        } else if (strcmp(argv[i], "-np") == 0) {
+            NTHREADS = atoi(argv[i + 1]);
+            if (NTHREADS < 0){
+                exit(1);
+            }
+            i++;
+        } else if (strcmp(argv[i], "-h") == 0) {
+            print_help();
+            exit(0);
+        }
+    }
+
+}
+
+int main(int argc, char* argv[]) {
+
+    parse_arguments(argc, argv);
+
+    read_input();
 
     struct timeb start, end;
     int diff;
@@ -529,7 +575,10 @@ int main(int argc, char* argv[]) {
 //    std::cout << std::endl;
 
     diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
-    printf("Operation took %u milliseconds\n", diff);
+
+    if (PRINT_TIME) {
+        printf("Operation took %u milliseconds\n", diff);
+    }
 
     printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
