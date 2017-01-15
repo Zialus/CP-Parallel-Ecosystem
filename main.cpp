@@ -455,9 +455,13 @@ void analyzeFoxes(int currentGen){
 
 void simGen(int gen){
 
+    memcpy(posMatrixTempAux, posMatrixAux, sizeof(MatrixElement)*R*C);
+
     prepareTempForRabbit();
 
     analyzeRabbits(gen);
+
+    memcpy(posMatrixAux, posMatrixTempAux, R*C*sizeof(MatrixElement));
 
     prepareTempForFox();
 
@@ -467,7 +471,6 @@ void simGen(int gen){
 }
 
 void prepareTempForRabbit() {
-    memcpy(posMatrixTempAux, posMatrixAux, sizeof(MatrixElement)*R*C);
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
@@ -476,10 +479,10 @@ void prepareTempForRabbit() {
             }
         }
     }
+
 }
 
 void prepareTempForFox() {
-    memcpy(posMatrixAux, posMatrixTempAux, R*C*sizeof(MatrixElement));
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
@@ -488,6 +491,7 @@ void prepareTempForFox() {
             }
         }
     }
+
 }
 
 void print_help() {
@@ -543,7 +547,6 @@ void read_input() {
         if (TYPE == "RABBIT"){
 
             Rabbit r = Rabbit(0, X, Y);
-//            RabbitSet.insert(r);
             MatrixElement el = MatrixElement(ElementType::RABBIT);
             el.elem.rb = r;
             posMatrix[X][Y] = el;
@@ -551,7 +554,6 @@ void read_input() {
         } else if (TYPE == "FOX"){
 
             Fox f = Fox(0,0,X,Y);
-//            FoxSet.insert(f);
             MatrixElement el = MatrixElement(ElementType::FOX);
             el.elem.fx = f;
             posMatrix[X][Y] = el;
@@ -559,7 +561,6 @@ void read_input() {
         } else if (TYPE == "ROCK"){
 
             Rock rk = Rock(X,Y);
-//            RockSet.insert(rk);
             MatrixElement el = MatrixElement(ElementType::ROCK);
             el.elem.rk = rk;
             posMatrix[X][Y] = el;
@@ -603,7 +604,6 @@ int main(int argc, char* argv[]) {
     read_input();
 
     struct timeb start, end;
-    int diff;
 
     ftime(&start);
 
@@ -628,7 +628,7 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
     }
 
-    diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
+    int diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
 
     if (PRINT_TIME) {
         printf("Operation took %u milliseconds\n", diff);
