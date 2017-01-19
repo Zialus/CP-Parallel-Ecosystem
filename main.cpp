@@ -133,7 +133,7 @@ std::pair<int,int> chooseMovePosition(int currentGen, int xPos, int yPos, std::v
 };
 
 void analyzeRabbits(int currentGen) {
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for
     for (int x = 0; x < R; x++) {
         for (int y = 0; y < C; y++) {
             if (posMatrix[x][y].element_type == ElementType::RABBIT) {
@@ -243,7 +243,7 @@ void analyzeRabbits(int currentGen) {
 }
 
 void analyzeFoxes(int currentGen){
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for
     for (int x = 0; x < R; x++) {
         for (int y = 0; y < C; y++) {
             if (posMatrix[x][y].element_type == ElementType::FOX) {
@@ -452,30 +452,37 @@ void analyzeFoxes(int currentGen){
 
 }
 
-
-void simGen(int gen){
-
-    memcpy(posMatrixTempAux, posMatrixAux, sizeof(MatrixElement)*R*C);
+void simGen(int gen) {
 
     prepareTempForRabbit();
 
     analyzeRabbits(gen);
 
-    memcpy(posMatrixAux, posMatrixTempAux, R*C*sizeof(MatrixElement));
-
     prepareTempForFox();
 
     analyzeFoxes(gen);
 
-    memcpy(posMatrixAux, posMatrixTempAux, R*C*sizeof(MatrixElement));
+    finalCopy();
+}
+
+void finalCopy(){
+#pragma omp parallel for
+    for (int i = 0; i < R; ++i) {
+        for (int j = 0; j < C; ++j) {
+            posMatrix[i][j] = posMatrixTemp[i][j];
+        }
+    }
 }
 
 void prepareTempForRabbit() {
 
+#pragma omp parallel for
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
-            if (posMatrixTemp[i][j].element_type == ElementType::RABBIT ) {
+            if (posMatrix[i][j].element_type == ElementType::RABBIT ) {
                 posMatrixTemp[i][j] = MatrixElement(ElementType::EMPTY);
+            } else {
+                posMatrixTemp[i][j] = posMatrix[i][j];
             }
         }
     }
@@ -484,8 +491,10 @@ void prepareTempForRabbit() {
 
 void prepareTempForFox() {
 
+#pragma omp parallel for
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
+            posMatrix[i][j] = posMatrixTemp[i][j];
             if (posMatrixTemp[i][j].element_type == ElementType::FOX) {
                 posMatrixTemp[i][j] = MatrixElement(ElementType::EMPTY);
             }

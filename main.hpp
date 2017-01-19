@@ -81,3 +81,4 @@ struct MatrixElement{
 
 void prepareTempForRabbit();
 void prepareTempForFox();
+void finalCopy();
