@@ -21,11 +21,12 @@ matrix:
           packages:
             - g++-6
       before_install:
+      - sudo sed -i 's/trusty/zesty/' /etc/apt/sources.list
       - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-      - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main"
-      - sudo add-apt-repository ppa:mc3man/trusty-media -y
-      - sudo apt-get update -y
+      - sudo apt-add-repository "deb http://apt.llvm.org/zesty/ llvm-toolchain-zesty-4.0 main"
+      - sudo apt-get update
       - sudo apt-get install clang-3.9
+      - sudo apt-get install libomp-dev
       - export CC=clang-3.9
       - export CXX=clang++-3.9
     - os: osx
@@ -35,8 +36,6 @@ matrix:
         - brew link --overwrite llvm --force
         - export CC=clang
         - export CXX=clang++
-  allow_failures:
-  - compiler: clang++
 
 script:
   - mkdir build
