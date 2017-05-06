@@ -19,6 +19,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
+      before_install:
+      - export CC=gcc-6
+      - export CXX=g++-6
     - os : linux
       compiler: clang++
       addons:
