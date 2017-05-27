@@ -68,7 +68,7 @@ matrix:
       before_script:
         - sudo sed -i 's/trusty/zesty/g' /etc/apt/sources.list
         - sudo apt-get update
-        - sudo apt-get install libomp-dev
+        - sudo apt-get install libomp-dev libc++-dev
     - os: linux
       addons:
         apt:
