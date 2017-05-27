@@ -47,25 +47,25 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
       before_script:
-        -brew update && brew cask uninstall oclint && brew install gcc@4.9
+        - brew update && brew cask uninstall oclint && brew install gcc@4.9
     - os: osx
       osx_image: xcode8.3
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
       before_script:
-        -brew update && brew cask uninstall oclint && brew install gcc@5
+        - brew update && brew cask uninstall oclint && brew install gcc@5
     - os: osx
       osx_image: xcode8.3
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
       before_script:
-        -brew update && brew cask uninstall oclint && brew install gcc@6
+        - brew update && brew cask uninstall oclint && brew install gcc@6
     - os: osx
       osx_image: xcode8.3
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       before_script:
-        -brew update && brew cask uninstall oclint && brew install gcc
+        - brew update && brew cask uninstall oclint && brew install gcc
 
     ######## LINUX CLANG ########
     - os: linux
@@ -131,7 +131,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
-      before_install:
+      env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
 
