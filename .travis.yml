@@ -28,12 +28,12 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-4.0
           packages:
             - g++-7
+            - clang-4.0
       before_install:
-      - sudo sed -i 's/trusty/zesty/' /etc/apt/sources.list
       - sudo apt-get update
-      - sudo apt-get install clang-4.0
       - sudo apt-get install libomp-dev
       - export CC=clang-4.0
       - export CXX=clang++-4.0
