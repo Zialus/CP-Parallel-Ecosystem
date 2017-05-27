@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <string.h>
+#include <cstring>
 #include <sys/timeb.h>
 #include <omp.h>
 #include "main.hpp"
@@ -587,11 +587,11 @@ void parse_arguments(int argc, char* argv[]){
             freopen(argv[i+1], "r", stdin);
             i++;
         } else if (strcmp(argv[i], "-v") == 0) {
-            PRINT_ALLGENS = 1;
+            PRINT_ALLGENS = true;
         } else if (strcmp(argv[i], "-pf") == 0) {
-            PRINT_FINAL_INFO = 1;
+            PRINT_FINAL_INFO = true;
         } else if (strcmp(argv[i], "-pt") == 0) {
-            PRINT_TIME = 1;
+            PRINT_TIME = true;
         } else if (strcmp(argv[i], "-np") == 0) {
             NTHREADS = atoi(argv[i + 1]);
             if (NTHREADS < 0){
