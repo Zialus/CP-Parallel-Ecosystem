@@ -28,11 +28,11 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
+            - llvm-toolchain-trusty-3.9
             - debian-sid
           packages:
             - g++-7
-            - clang-4.0
+            - clang-3.9
             - libomp-dev
       before_install:
       #- sudo apt-get update
