@@ -37,8 +37,8 @@ matrix:
       before_install:
       #- sudo apt-get update
       #- sudo apt-get install libomp-dev
-      - export CC=clang-4.0
-      - export CXX=clang++-4.0
+      - export CC=clang-3.9
+      - export CXX=clang++-3.9
     - os: osx
       osx_image: xcode8.3
       before_install:
