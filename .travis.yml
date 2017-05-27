@@ -16,19 +16,19 @@ matrix:
   include:
 
     ######## OSX CLANG ########
-   - os: osx
+    - os: osx
       osx_image: xcode8.3
       env:
         - MATRIX_EVAL="CC=clang-3.7 && CXX=clang-3.7"
       before_script:
         - brew update && brew cask uninstall oclint && brew install llvm@3.7 && brew link --overwrite llvm@3.7 --force
-   - os: osx
+    - os: osx
       osx_image: xcode8.3
       env:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang-3.8"
       before_script:
         - brew update && brew cask uninstall oclint && brew install llvm@3.8 && brew link --overwrite llvm@3.8 --force
-   - os: osx
+    - os: osx
       osx_image: xcode8.3
       env:
         - MATRIX_EVAL="CC=clang-3.9 && CXX=clang-3.9"
@@ -40,6 +40,7 @@ matrix:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang-4.0"
       before_script:
         - brew update && brew cask uninstall oclint && brew install llvm && brew link --overwrite llvm --force
+
     ######## OSX GCC ########
     - os: osx
       osx_image: xcode8.3
