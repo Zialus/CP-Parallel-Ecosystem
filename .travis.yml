@@ -19,25 +19,13 @@ matrix:
     - os: osx
       osx_image: xcode8.3
       env:
-        - MATRIX_EVAL="CC=clang-3.7 && CXX=clang-3.7"
-      before_script:
-        - brew update && brew cask uninstall oclint && brew install llvm@3.7 && brew link --overwrite llvm@3.7 --force
-    - os: osx
-      osx_image: xcode8.3
-      env:
-        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang-3.8"
-      before_script:
-        - brew update && brew cask uninstall oclint && brew install llvm@3.8 && brew link --overwrite llvm@3.8 --force
-    - os: osx
-      osx_image: xcode8.3
-      env:
-        - MATRIX_EVAL="CC=clang-3.9 && CXX=clang-3.9"
+        - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++"
       before_script:
         - brew update && brew cask uninstall oclint && brew install llvm@3.9 && brew link --overwrite llvm@3.9 --force
     - os: osx
       osx_image: xcode8.3
       env:
-        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang-4.0"
+        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++"
       before_script:
         - brew update && brew cask uninstall oclint && brew install llvm && brew link --overwrite llvm --force
 
@@ -91,8 +79,10 @@ matrix:
         apt:
           sources:
             - llvm-toolchain-trusty
+            - debian-sid
           packages:
             - clang-5.0
+            - libomp-dev
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
@@ -133,26 +123,3 @@ matrix:
             - g++-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-
-
-
-#    - os : linux
-#      compiler: clang++
-#      addons:
-#        apt:
-#          sources:
-#            - ubuntu-toolchain-r-test
-#            - llvm-toolchain-trusty-3.9
-#            - debian-sid
-#          packages:
-#            - g++-7
-#            - clang-3.9
-#            - libomp-dev
-#      before_install:
-#      #- sudo apt-get update
-#      #- sudo apt-get install libomp-dev
-#      - export CC=clang-3.9
-#      - export CXX=clang++-3.9
-
-
-
