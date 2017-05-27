@@ -19,8 +19,9 @@ matrix:
     - os: osx
       osx_image: xcode8.3
       env:
-        - MATRIX_EVAL="CC=clang && CXX=clang++ && brew update && brew cask uninstall oclint && brew install llvm && brew link --overwrite llvm --force"
-
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+      before_script:
+        - brew update && brew cask uninstall oclint && brew install llvm && brew link --overwrite llvm --force
     ######## OSX GCC ########
     - os: osx
       osx_image: xcode8.3
@@ -97,7 +98,6 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
     - os : linux
-      compiler: g++
       addons:
         apt:
           sources:
