@@ -29,12 +29,14 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
+            - debian-sid
           packages:
             - g++-7
             - clang-4.0
+            - libomp-dev
       before_install:
-      - sudo apt-get update
-      - sudo apt-get install libomp-dev
+      #- sudo apt-get update
+      #- sudo apt-get install libomp-dev
       - export CC=clang-4.0
       - export CXX=clang++-4.0
     - os: osx
