@@ -66,7 +66,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
       before_script:
-        - sudo sed -i 's/trusty/zesty/' /etc/apt/sources.list
+        - sudo sed -i 's/trusty/zesty/g' /etc/apt/sources.list
         - sudo apt-get update
         - sudo apt-get install libomp-dev
     - os: linux
@@ -79,7 +79,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
       before_script:
-        - sudo sed -i 's/trusty/zesty/' /etc/apt/sources.list
+        - sudo sed -i 's/trusty/zesty/g' /etc/apt/sources.list
         - sudo apt-get update
         - sudo apt-get install libomp-dev
     - os: linux
@@ -92,7 +92,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
       before_script:
-        - sudo sed -i 's/trusty/zesty/' /etc/apt/sources.list
+        - sudo sed -i 's/trusty/zesty/g' /etc/apt/sources.list
         - sudo apt-get update
         - sudo apt-get install libomp-dev
 
