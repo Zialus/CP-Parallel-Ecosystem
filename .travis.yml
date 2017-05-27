@@ -18,10 +18,10 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6
+            - g++-7
       before_install:
-      - export CC=gcc-6
-      - export CXX=g++-6
+      - export CC=gcc-7
+      - export CXX=g++-7
     - os : linux
       compiler: clang++
       addons:
@@ -29,7 +29,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6
+            - g++-7
       before_install:
       - sudo sed -i 's/trusty/zesty/' /etc/apt/sources.list
       - sudo apt-get update
