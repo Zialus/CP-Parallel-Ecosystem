@@ -17,58 +17,60 @@ matrix:
 
     ######## OSX CLANG ########
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode9
       env:
         - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++"
       before_script:
-        - brew update && brew cask uninstall oclint && brew install llvm@3.9 && brew link --overwrite llvm@3.9 --force
+        - brew cask uninstall oclint && brew install llvm@3.9 && brew link --overwrite llvm@3.9 --force
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode9
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++"
       before_script:
-        - brew update && brew cask uninstall oclint && brew install llvm && brew link --overwrite llvm --force
+        - brew cask uninstall oclint && brew install llvm && brew link --overwrite llvm --force
 
     ######## OSX GCC ########
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode9
       env:
         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
       before_script:
-        - brew update && brew cask uninstall oclint && brew install gcc@4.9
+        - brew cask uninstall oclint && brew install gcc@4.9
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode9
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
       before_script:
-        - brew update && brew cask uninstall oclint && brew install gcc@5
+        - brew cask uninstall oclint && brew install gcc@5
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode9
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
       before_script:
-        - brew update && brew cask uninstall oclint && brew install gcc@6
+        - brew cask uninstall oclint && brew install gcc@6
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode9
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       before_script:
-        - brew update && brew cask uninstall oclint && brew install gcc
+        - brew cask uninstall oclint && brew install gcc
 
     ######## LINUX CLANG ########
     - os: linux
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.9
           packages:
+            - libstdc++-6-dev
             - clang-3.9
       env:
         - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
       before_script:
         - sudo sed -i 's/trusty/zesty/g' /etc/apt/sources.list
         - sudo apt-get update
-        - sudo apt-get install libomp-dev libstdc++-6-dev
+        - sudo apt-get install libomp-dev
     - os: linux
       addons:
         apt:
