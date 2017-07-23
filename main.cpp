@@ -14,20 +14,21 @@ MatrixElement* posMatrixTempAux;
 omp_lock_t** lockMatrix;
 omp_lock_t* lockMatrixAux;
 
-int GEN_PROC_RABBITS ; // number of generations until a rabbit can procreate
-int GEN_PROC_FOXES ; // number of generations until a fox can procreate
-int GEN_FOOD_FOXES ; // number of generations for a fox to die of starvation
-int N_GEN ; // number of generations for the simulation
-int R ; // number of rows of the matrix representing the ecosystem
-int C ; // number of columns of the matrix representing the ecosystem
-int N ; // number of objects in the initial ecosystem
+int GEN_PROC_RABBITS; // number of generations until a rabbit can procreate
+int GEN_PROC_FOXES; // number of generations until a fox can procreate
+int GEN_FOOD_FOXES; // number of generations for a fox to die of starvation
+int N_GEN; // number of generations for the simulation
+int R; // number of rows of the matrix representing the ecosystem
+int C; // number of columns of the matrix representing the ecosystem
+int N; // number of objects in the initial ecosystem
 
 bool PRINT_FINAL_INFO;
 bool PRINT_TIME;
 bool PRINT_ALLGENS;
 int NTHREADS = -1;
 
-void printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES){
+void
+printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES) {
 
     int counter = 0;
 
@@ -63,7 +64,7 @@ void printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBIT
 
 void printMatrix(MatrixElement** matrix, int R, int C) {
 
-    for (int i = 0; i < R+2; ++i) {
+    for (int i = 0; i < R + 2; ++i) {
         printf("-");
     }
     printf("\n");
@@ -76,54 +77,48 @@ void printMatrix(MatrixElement** matrix, int R, int C) {
         printf("|\n");
     }
 
-    for (int i = 0; i < R+2; ++i) {
+    for (int i = 0; i < R + 2; ++i) {
         printf("-");
     }
     printf("\n");
 
 }
 
-std::vector<char> checkAdjacencies(MatrixElement** matrix ,int X, int Y,ElementType type){
+std::vector<char> checkAdjacencies(MatrixElement** matrix, int X, int Y, ElementType type) {
     std::vector<char> validPositions;
-    if(X-1 >= 0 && matrix[X-1][Y].element_type == type){ //NORTH
+    if (X - 1 >= 0 && matrix[X - 1][Y].element_type == type) { //NORTH
         validPositions.push_back('N');
     }
 
-    if(Y+1 < C && matrix[X][Y+1].element_type == type){ //EAST
+    if (Y + 1 < C && matrix[X][Y + 1].element_type == type) { //EAST
         validPositions.push_back('E');
     }
 
-    if(X+1 < R && matrix[X+1][Y].element_type == type){ // SOUTH
+    if (X + 1 < R && matrix[X + 1][Y].element_type == type) { // SOUTH
         validPositions.push_back('S');
     }
 
-    if(Y-1 >= 0 && matrix[X][Y-1].element_type == type) { //WEST
+    if (Y - 1 >= 0 && matrix[X][Y - 1].element_type == type) { //WEST
         validPositions.push_back('W');
     }
 
     return validPositions;
 }
 
-std::pair<int,int> chooseMovePosition(int currentGen, int xPos, int yPos, std::vector<char> posVal){
+std::pair<int, int> chooseMovePosition(int currentGen, int xPos, int yPos, std::vector<char> posVal) {
     int pos = (int) ((currentGen + xPos + yPos) % posVal.size());
 
-    if(posVal[pos] == 'N'){
-        std::pair<int, int> posPair = std::make_pair(xPos-1,yPos);
+    if (posVal[pos] == 'N') {
+        std::pair<int, int> posPair = std::make_pair(xPos - 1, yPos);
         return posPair;
-    }
-
-    else if(posVal[pos] == 'E'){
-        std::pair<int, int> posPair = std::make_pair (xPos,yPos+1);
+    } else if (posVal[pos] == 'E') {
+        std::pair<int, int> posPair = std::make_pair(xPos, yPos + 1);
         return posPair;
-    }
-
-    else if(posVal[pos] == 'S'){
-        std::pair<int, int> posPair = std::make_pair (xPos+1,yPos);
+    } else if (posVal[pos] == 'S') {
+        std::pair<int, int> posPair = std::make_pair(xPos + 1, yPos);
         return posPair;
-    }
-
-    else if(posVal[pos] == 'W'){
-        std::pair<int, int> posPair = std::make_pair (xPos,yPos-1);
+    } else if (posVal[pos] == 'W') {
+        std::pair<int, int> posPair = std::make_pair(xPos, yPos - 1);
         return posPair;
     }
 
@@ -140,7 +135,7 @@ void analyzeRabbits(int currentGen) {
                 Rabbit rabbit = posMatrix[x][y].elem.rb;
                 std::vector<char> validPositions = checkAdjacencies(posMatrix, x, y, ElementType::EMPTY);
 
-                Rabbit rabbitTemp = Rabbit(rabbit.procAge+1,x,y);
+                Rabbit rabbitTemp = Rabbit(rabbit.procAge + 1, x, y);
                 if (validPositions.size() > 0) {
 
                     std::pair<int, int> posToMove = chooseMovePosition(currentGen, x, y, validPositions);
@@ -148,8 +143,9 @@ void analyzeRabbits(int currentGen) {
                     int yToMove = posToMove.second;
 
                     bool canProc = rabbitTemp.procAge > GEN_PROC_RABBITS;
-                    if (canProc)
+                    if (canProc) {
                         rabbitTemp.procAge = 0;
+                    }
 
                     omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                     if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY) {
@@ -242,13 +238,13 @@ void analyzeRabbits(int currentGen) {
     }
 }
 
-void analyzeFoxes(int currentGen){
+void analyzeFoxes(int currentGen) {
 #pragma omp parallel for
     for (int x = 0; x < R; x++) {
         for (int y = 0; y < C; y++) {
             if (posMatrix[x][y].element_type == ElementType::FOX) {
                 Fox fox = posMatrix[x][y].elem.fx;
-                Fox foxTemp = Fox(fox.hungryAge, fox.procAge+1, x,y);
+                Fox foxTemp = Fox(fox.hungryAge, fox.procAge + 1, x, y);
 
                 std::vector<char> validPositionsWithRabbits = checkAdjacencies(posMatrix, x, y, ElementType::RABBIT);
                 std::vector<char> validPositions = checkAdjacencies(posMatrix, x, y, ElementType::EMPTY);
@@ -260,8 +256,9 @@ void analyzeFoxes(int currentGen){
 
 
                     bool canProc = foxTemp.procAge > GEN_PROC_FOXES;
-                    if (canProc)
+                    if (canProc) {
                         foxTemp.procAge = 0;
+                    }
 
                     omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                     if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::RABBIT) {
@@ -291,9 +288,9 @@ void analyzeFoxes(int currentGen){
 
                     } else if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::FOX) {
 
-                        if (foxTemp.procAge  > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
-                            (foxTemp.procAge  == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                             && foxTemp.hungryAge+1  < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)) {
+                        if (foxTemp.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
+                            (foxTemp.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
+                             && foxTemp.hungryAge + 1 < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)) {
 
                             // delete the fox that was there
 
@@ -312,7 +309,7 @@ void analyzeFoxes(int currentGen){
                                 posMatrixTemp[xToMove][yToMove] = elFather;
 
                             } else {
-                                Fox newFox = Fox(0, foxTemp.procAge , xToMove, yToMove);
+                                Fox newFox = Fox(0, foxTemp.procAge, xToMove, yToMove);
                                 MatrixElement elNew = MatrixElement(ElementType::FOX);
                                 elNew.elem.fx = newFox;
 
@@ -342,11 +339,12 @@ void analyzeFoxes(int currentGen){
                     omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
 
 
-                } else if (validPositions.size() > 0 && fox.hungryAge+1 < GEN_FOOD_FOXES) {
+                } else if (validPositions.size() > 0 && fox.hungryAge + 1 < GEN_FOOD_FOXES) {
 
                     bool canProc = foxTemp.procAge > GEN_PROC_FOXES;
-                    if (canProc)
+                    if (canProc) {
                         foxTemp.procAge = 0;
+                    }
 
                     std::pair<int, int> posToMove = chooseMovePosition(currentGen, x, y, validPositions);
                     int xToMove = posToMove.first;
@@ -355,8 +353,8 @@ void analyzeFoxes(int currentGen){
                     omp_set_lock(&(lockMatrix[xToMove][yToMove]));
                     if (posMatrixTemp[xToMove][yToMove].element_type == ElementType::EMPTY) {
 
-                        if (canProc){
-                            Fox fatherFox = Fox(foxTemp.hungryAge+1, 0, xToMove, yToMove);
+                        if (canProc) {
+                            Fox fatherFox = Fox(foxTemp.hungryAge + 1, 0, xToMove, yToMove);
                             Fox babyFox = Fox(0, 0, x, y);
                             MatrixElement elFather = MatrixElement(ElementType::FOX);
                             MatrixElement elBaby = MatrixElement(ElementType::FOX);
@@ -370,7 +368,7 @@ void analyzeFoxes(int currentGen){
                             posMatrixTemp[xToMove][yToMove] = elFather;
 
                         } else {
-                            Fox newFox = Fox(foxTemp.hungryAge+1, foxTemp.procAge, xToMove, yToMove);
+                            Fox newFox = Fox(foxTemp.hungryAge + 1, foxTemp.procAge, xToMove, yToMove);
                             MatrixElement elNew = MatrixElement(ElementType::FOX);
                             elNew.elem.fx = newFox;
 
@@ -382,10 +380,10 @@ void analyzeFoxes(int currentGen){
 
                         if (foxTemp.procAge > posMatrixTemp[xToMove][yToMove].elem.fx.procAge ||
                             (foxTemp.procAge == posMatrixTemp[xToMove][yToMove].elem.fx.procAge
-                             && foxTemp.hungryAge +1 < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)) {
+                             && foxTemp.hungryAge + 1 < posMatrixTemp[xToMove][yToMove].elem.fx.hungryAge)) {
 
                             if (canProc) {
-                                Fox fatherFox = Fox(foxTemp.hungryAge +1 , 0, xToMove, yToMove);
+                                Fox fatherFox = Fox(foxTemp.hungryAge + 1, 0, xToMove, yToMove);
                                 Fox babyFox = Fox(0, 0, x, y);
                                 MatrixElement elFather = MatrixElement(ElementType::FOX);
                                 MatrixElement elBaby = MatrixElement(ElementType::FOX);
@@ -399,7 +397,7 @@ void analyzeFoxes(int currentGen){
                                 posMatrixTemp[xToMove][yToMove] = elFather;
 
                             } else {
-                                Fox newFox = Fox(foxTemp.hungryAge +1, foxTemp.procAge , xToMove, yToMove);
+                                Fox newFox = Fox(foxTemp.hungryAge + 1, foxTemp.procAge, xToMove, yToMove);
                                 MatrixElement elNew = MatrixElement(ElementType::FOX);
                                 elNew.elem.fx = newFox;
 
@@ -427,9 +425,9 @@ void analyzeFoxes(int currentGen){
 
                     omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
 
-                } else if (foxTemp.hungryAge +1 < GEN_FOOD_FOXES) {
+                } else if (foxTemp.hungryAge + 1 < GEN_FOOD_FOXES) {
                     // There's no valid Position to move into. Fox raises its ProcAge and doesn't move.
-                    Fox newFox = Fox(foxTemp.hungryAge +1 , foxTemp.procAge , x, y);
+                    Fox newFox = Fox(foxTemp.hungryAge + 1, foxTemp.procAge, x, y);
 
                     MatrixElement elNew = MatrixElement(ElementType::FOX);
                     elNew.elem.fx = newFox;
@@ -438,7 +436,7 @@ void analyzeFoxes(int currentGen){
                     posMatrixTemp[x][y] = elNew;
                     omp_unset_lock(&(lockMatrix[x][y]));
 
-                } else if (foxTemp.hungryAge +1 >= GEN_FOOD_FOXES) {
+                } else if (foxTemp.hungryAge + 1 >= GEN_FOOD_FOXES) {
                     omp_set_lock(&(lockMatrix[x][y]));
                     posMatrixTemp[x][y] = MatrixElement(ElementType::EMPTY);
                     omp_unset_lock(&(lockMatrix[x][y]));
@@ -465,7 +463,7 @@ void simGen(int gen) {
     finalCopy();
 }
 
-void finalCopy(){
+void finalCopy() {
 #pragma omp parallel for
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
@@ -479,7 +477,7 @@ void prepareTempForRabbit() {
 #pragma omp parallel for
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
-            if (posMatrix[i][j].element_type == ElementType::RABBIT ) {
+            if (posMatrix[i][j].element_type == ElementType::RABBIT) {
                 posMatrixTemp[i][j] = MatrixElement(ElementType::EMPTY);
             } else {
                 posMatrixTemp[i][j] = posMatrix[i][j];
@@ -517,23 +515,23 @@ void print_help() {
 void read_input() {
     std::cin >> GEN_PROC_RABBITS >> GEN_PROC_FOXES >> GEN_FOOD_FOXES >> N_GEN >> R >> C >> N;
 
-    posMatrix = new MatrixElement*[R];
-    posMatrixAux = new MatrixElement[R*C];
+    posMatrix = new MatrixElement* [R];
+    posMatrixAux = new MatrixElement[R * C];
 
-    posMatrixTemp = new MatrixElement*[R];
-    posMatrixTempAux = new MatrixElement[R*C];
+    posMatrixTemp = new MatrixElement* [R];
+    posMatrixTempAux = new MatrixElement[R * C];
 
-    lockMatrix = new omp_lock_t*[R];
-    lockMatrixAux = new omp_lock_t[R*C];
+    lockMatrix = new omp_lock_t* [R];
+    lockMatrixAux = new omp_lock_t[R * C];
 
     for (int i = 0; i < R; ++i) {
-        posMatrix[i] = &posMatrixAux[i*C];
-        posMatrixTemp[i] = &posMatrixTempAux[i*C];
-        lockMatrix[i] = &lockMatrixAux[i*C];
+        posMatrix[i] = &posMatrixAux[i * C];
+        posMatrixTemp[i] = &posMatrixTempAux[i * C];
+        lockMatrix[i] = &lockMatrixAux[i * C];
     }
 
-    for (int i=0; i<R; i++) {
-        for(int j=0; j<C; j++){
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
             omp_init_lock(&(lockMatrix[i][j]));
         }
     }
@@ -553,23 +551,23 @@ void read_input() {
 
         std::cin >> TYPE >> X >> Y;
 
-        if (TYPE == "RABBIT"){
+        if (TYPE == "RABBIT") {
 
             Rabbit r = Rabbit(0, X, Y);
             MatrixElement el = MatrixElement(ElementType::RABBIT);
             el.elem.rb = r;
             posMatrix[X][Y] = el;
 
-        } else if (TYPE == "FOX"){
+        } else if (TYPE == "FOX") {
 
-            Fox f = Fox(0,0,X,Y);
+            Fox f = Fox(0, 0, X, Y);
             MatrixElement el = MatrixElement(ElementType::FOX);
             el.elem.fx = f;
             posMatrix[X][Y] = el;
 
-        } else if (TYPE == "ROCK"){
+        } else if (TYPE == "ROCK") {
 
-            Rock rk = Rock(X,Y);
+            Rock rk = Rock(X, Y);
             MatrixElement el = MatrixElement(ElementType::ROCK);
             el.elem.rk = rk;
             posMatrix[X][Y] = el;
@@ -580,11 +578,11 @@ void read_input() {
     }
 }
 
-void parse_arguments(int argc, char* argv[]){
+void parse_arguments(int argc, char* argv[]) {
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-f") == 0) {
-            freopen(argv[i+1], "r", stdin);
+            freopen(argv[i + 1], "r", stdin);
             i++;
         } else if (strcmp(argv[i], "-v") == 0) {
             PRINT_ALLGENS = true;
@@ -594,7 +592,7 @@ void parse_arguments(int argc, char* argv[]){
             PRINT_TIME = true;
         } else if (strcmp(argv[i], "-np") == 0) {
             NTHREADS = atoi(argv[i + 1]);
-            if (NTHREADS < 0){
+            if (NTHREADS < 0) {
                 exit(1);
             }
             i++;
@@ -616,7 +614,7 @@ int main(int argc, char* argv[]) {
 
     ftime(&start);
 
-    if(NTHREADS != -1) {
+    if (NTHREADS != -1) {
         omp_set_num_threads(NTHREADS);
     }
 

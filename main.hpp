@@ -2,13 +2,15 @@
 
 #include <cstdio>
 
-typedef enum { RABBIT, FOX, ROCK, EMPTY } ElementType;
+typedef enum {
+    RABBIT, FOX, ROCK, EMPTY
+} ElementType;
 
 struct Rock {
 
     Rock() = default;
 
-    Rock(int x,int y) {
+    Rock(int x, int y) {
         pos_x = x;
         pos_y = y;
     }
@@ -52,11 +54,11 @@ struct Fox {
 
 };
 
-struct MatrixElement{
+struct MatrixElement {
 
     MatrixElement() = default;
 
-    MatrixElement(ElementType type){
+    MatrixElement(ElementType type) {
         element_type = type;
     }
 
@@ -68,12 +70,16 @@ struct MatrixElement{
         struct Rock rk;
     } elem;
 
-    char getChar(){
-        switch (this->element_type){
-            case RABBIT: return 'R';
-            case FOX: return 'F';
-            case ROCK: return '*';
-            case EMPTY: return ' ';
+    char getChar() {
+        switch (this->element_type) {
+            case RABBIT:
+                return 'R';
+            case FOX:
+                return 'F';
+            case ROCK:
+                return '*';
+            case EMPTY:
+                return ' ';
         }
         return '?';
     }
