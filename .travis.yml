@@ -27,7 +27,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++"
       before_script:
-        - brew cask uninstall oclint && brew install llvm && brew link --overwrite llvm@4 --force
+        - brew cask uninstall oclint && brew install llvm@4 && brew link --overwrite llvm@4 --force
     - os: osx
       osx_image: xcode9
       env:
