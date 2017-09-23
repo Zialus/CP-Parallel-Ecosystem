@@ -136,7 +136,7 @@ void analyzeRabbits(int currentGen) {
                 std::vector<char> validPositions = checkAdjacencies(posMatrix, x, y, ElementType::EMPTY);
 
                 Rabbit rabbitTemp = Rabbit(rabbit.procAge + 1, x, y);
-                if (validPositions.size() > 0) {
+                if (!validPositions.empty()) {
 
                     std::pair<int, int> posToMove = chooseMovePosition(currentGen, x, y, validPositions);
                     int xToMove = posToMove.first;
@@ -249,7 +249,7 @@ void analyzeFoxes(int currentGen) {
                 std::vector<char> validPositionsWithRabbits = checkAdjacencies(posMatrix, x, y, ElementType::RABBIT);
                 std::vector<char> validPositions = checkAdjacencies(posMatrix, x, y, ElementType::EMPTY);
 
-                if (validPositionsWithRabbits.size() > 0) {
+                if (!validPositionsWithRabbits.empty()) {
                     std::pair<int, int> posToMove = chooseMovePosition(currentGen, x, y, validPositionsWithRabbits);
                     int xToMove = posToMove.first;
                     int yToMove = posToMove.second;
@@ -339,7 +339,7 @@ void analyzeFoxes(int currentGen) {
                     omp_unset_lock(&(lockMatrix[xToMove][yToMove]));
 
 
-                } else if (validPositions.size() > 0 && fox.hungryAge + 1 < GEN_FOOD_FOXES) {
+                } else if (!validPositions.empty() && fox.hungryAge + 1 < GEN_FOOD_FOXES) {
 
                     bool canProc = foxTemp.procAge > GEN_PROC_FOXES;
                     if (canProc) {
@@ -638,7 +638,7 @@ int main(int argc, char* argv[]) {
     int diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
 
     if (PRINT_TIME) {
-        printf("Operation took %u milliseconds\n", diff);
+        printf("Operation took %d milliseconds\n", diff);
     }
 
     printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);

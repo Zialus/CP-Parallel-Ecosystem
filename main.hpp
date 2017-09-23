@@ -58,7 +58,7 @@ struct MatrixElement {
 
     MatrixElement() = default;
 
-    MatrixElement(ElementType type) {
+    explicit MatrixElement(ElementType type) {
         element_type = type;
     }
 
