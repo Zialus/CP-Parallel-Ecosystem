@@ -643,5 +643,19 @@ int main(int argc, char* argv[]) {
 
     printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
 
+    freeEverything();
+
     return 0;
+}
+
+void freeEverything() {
+
+    delete[] posMatrix;
+    delete[] posMatrixAux;
+
+    delete[] posMatrixTemp;
+    delete[] posMatrixTempAux;
+
+    delete[] lockMatrix;
+    delete[] lockMatrixAux;
 }
