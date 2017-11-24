@@ -1,16 +1,11 @@
-version: '1.0.{build}'
-
 image:
   - Visual Studio 2017
   - Visual Studio 2015
 
-platform:
-  - x64
-
 build_script:
-    - mkdir build && cd build
-    - cmake ..
-    - cmake --build . --config Release
+  - mkdir build && cd build
+  - cmake ..
+  - cmake --build . --config Release
 
 test_script:
   - ctest -V
