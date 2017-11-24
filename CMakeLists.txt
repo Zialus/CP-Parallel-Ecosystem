@@ -12,7 +12,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 ##### EXECUTABLE ZONE #####
-set(SOURCE_FILES main.cpp main.hpp)
+set(SOURCE_FILES src/main.cpp src/main.hpp)
 add_executable(ecosystem ${SOURCE_FILES})
 
 ##### TESTS ZONE #####
