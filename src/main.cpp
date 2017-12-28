@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include <cstring>
 #include <sys/timeb.h>
@@ -24,13 +25,17 @@ int R; // number of rows of the matrix representing the ecosystem
 int C; // number of columns of the matrix representing the ecosystem
 int N; // number of objects in the initial ecosystem
 
-bool PRINT_FINAL_INFO;
+const char* expected_file;
+
+bool PRINT_FINAL_INFO = true;
 bool PRINT_TIME;
 bool PRINT_ALLGENS;
 int NTHREADS = -1;
 
 void
-printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES) {
+printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES,
+                  FILE* file) {
+    std::cout << "Printing solution to file... ";
 
     int counter = 0;
 
@@ -46,22 +51,22 @@ printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, in
         }
     }
 
-    printf("%d %d %d %d %d %d %d\n", GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES, 0, R, C, counter);
+    fprintf(file, "%d %d %d %d %d %d %d\n", GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES, 0, R, C, counter);
 
     if (PRINT_FINAL_INFO) {
         for (int i = 0; i < R; i++) {
             for (int j = 0; j < C; j++) {
                 if (matrix[i][j].element_type == ElementType::RABBIT) {
-                    printf("RABBIT %d %d\n", i, j);
+                    fprintf(file, "RABBIT %d %d\n", i, j);
                 } else if (matrix[i][j].element_type == ElementType::FOX) {
-                    printf("FOX %d %d\n", i, j);
+                    fprintf(file, "FOX %d %d\n", i, j);
                 } else if (matrix[i][j].element_type == ElementType::ROCK) {
-                    printf("ROCK %d %d\n", i, j);
+                    fprintf(file, "ROCK %d %d\n", i, j);
                 }
             }
         }
     }
-
+    std::cout << "DONE!" << std::endl;
 }
 
 void printMatrix(MatrixElement** matrix, int R, int C) {
@@ -583,8 +588,11 @@ void read_input() {
 void parse_arguments(int argc, char* argv[]) {
 
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-f") == 0) {
-            freopen(argv[i + 1], "r", stdin);
+        if (strcmp(argv[i], "-if") == 0) {
+            if (freopen(argv[i + 1], "r", stdin) == nullptr) {
+                perror("freopen() failed");
+                exit(1);
+            };
             i++;
         } else if (strcmp(argv[i], "-v") == 0) {
             PRINT_ALLGENS = true;
@@ -601,9 +609,47 @@ void parse_arguments(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "-h") == 0) {
             print_help();
             exit(0);
+        } else if (strcmp(argv[i], "-of") == 0) {
+            expected_file = argv[i + 1];
+            i++;
         }
     }
 
+}
+
+template<typename InputIterator1, typename InputIterator2>
+bool range_equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2) {
+    while (first1 != last1 && first2 != last2) {
+        if (*first1 != *first2) { return false; }
+        ++first1;
+        ++first2;
+    }
+    return (first1 == last1) && (first2 == last2);
+}
+
+bool compare_files(const std::string& filename1, const std::string& filename2) {
+    std::ifstream file1(filename1);
+    std::ifstream file2(filename2);
+
+    std::istreambuf_iterator<char> begin1(file1);
+    std::istreambuf_iterator<char> begin2(file2);
+
+    std::istreambuf_iterator<char> end;
+
+    return range_equal(begin1, end, begin2, end);
+}
+
+void dealWithOutput(const char* expected_file) {
+    const char* outfile = "tmp.txt";
+    FILE* file = fopen(outfile, "w");
+
+    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES, file);
+
+    fclose(file);
+
+    std::cout << "Comparing the output... ";
+    std::string result = compare_files(outfile, expected_file) ? "CORRECT OUTPUT" : "WRONG OUTPUT";
+    std::cout << result << "!" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -612,7 +658,8 @@ int main(int argc, char* argv[]) {
 
     read_input();
 
-    struct timeb start, end;
+    struct timeb start{};
+    struct timeb end{};
 
     ftime(&start);
 
@@ -643,7 +690,7 @@ int main(int argc, char* argv[]) {
         printf("Operation took %d milliseconds\n", diff);
     }
 
-    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES);
+    dealWithOutput(expected_file);
 
     freeEverything();
 
