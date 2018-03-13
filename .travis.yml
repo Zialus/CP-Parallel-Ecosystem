@@ -39,7 +39,15 @@ matrix:
       before_script:
         - brew update
         - brew cask uninstall oclint
-        - brew install llvm && brew link --overwrite llvm --force
+        - brew install llvm@5 && brew link --overwrite llvm@5 --force
+    - os: osx
+      osx_image: xcode9.3
+      env:
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++"
+      before_script:
+        - brew update
+        - brew cask uninstall oclint
+        - brew install llvm@6 && brew link --overwrite llvm@6 --force
 
     ######## OSX GCC ########
     - os: osx
