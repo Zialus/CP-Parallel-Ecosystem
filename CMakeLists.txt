@@ -1,14 +1,13 @@
 ##### GENERAL CONFIG ZONE #####
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.9)
 project(cp-rabits-and-foxes)
 
 set(CMAKE_CXX_STANDARD 14)
 
-##### OpenMP ZONE #####
-FIND_PACKAGE(OpenMP REQUIRED)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+FIND_PACKAGE(OpenMP REQUIRED)
 
 ##### EXECUTABLE ZONE #####
 set(SOURCE_FILES src/main.cpp src/main.hpp)
@@ -16,7 +15,7 @@ set(SOURCE_FILES src/main.cpp src/main.hpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/exec")
 
 add_executable(ecosystem ${SOURCE_FILES})
-target_link_libraries(ecosystem ${OpenMP_CXX_LIB_NAMES})
+target_link_libraries(ecosystem OpenMP::OpenMP_CXX)
 
 ##### TESTS ZONE #####
 enable_testing()
