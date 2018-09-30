@@ -1,11 +1,12 @@
 image:
   - Visual Studio 2017
   - Visual Studio 2015
-  - Ubuntu
+  - Ubuntu1804
+  - Ubuntu1604
 
 build_script:
   - mkdir build && cd build
-  - cmake ..
+  - cmake -DCMAKE_BUILD_TYPE=Release ..
   - cmake --build . --config Release
 
 test_script:
