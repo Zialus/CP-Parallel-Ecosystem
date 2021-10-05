@@ -12,30 +12,200 @@ env:
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.
+    name: OS ${{ matrix.os }} | Compiler ${{ matrix.compiler-name }} | Version ${{ matrix.compiler-version }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-latest, ubuntu-latests, macos-latest ]
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        compiler-version: [ '' ]
+        compiler-name: [ '' ]
+        cc: [ '' ]
+        cxx: [ '' ]
+        include:
+          # MacOS CLANG
+          - os: macos-latest
+            compiler-name: llvm
+            compiler-version: 7
+            cc: /usr/local/opt/llvm@7/bin/clang-7
+            cxx: /usr/local/opt/llvm@7/bin/clang++
+            extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
+          - os: macos-latest
+            compiler-name: llvm
+            compiler-version: 8
+            cc: /usr/local/opt/llvm@8/bin/clang-8
+            cxx: /usr/local/opt/llvm@8/bin/clang++
+            extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
+          - os: macos-latest
+            compiler-name: llvm
+            compiler-version: 9
+            cc: /usr/local/opt/llvm@9/bin/clang-9
+            cxx: /usr/local/opt/llvm@9/bin/clang++
+            extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
+#          - os: macos-latest
+#            compiler-name: llvm
+#            compiler-version: 10
+#            cc: /usr/local/opt/llvm@10/bin/clang-10
+#            cxx: /usr/local/opt/llvm@10/bin/clang++
+#            extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
+          - os: macos-latest
+            compiler-name: llvm
+            compiler-version: 11
+            cc: /usr/local/opt/llvm@11/bin/clang-11
+            cxx: /usr/local/opt/llvm@11/bin/clang++
+            extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
+          - os: macos-latest
+            compiler-name: llvm
+            compiler-version: 12
+            cc: /usr/local/opt/llvm@12/bin/clang-12
+            cxx: /usr/local/opt/llvm@12/bin/clang++
+            extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
+          - os: macos-latest
+            compiler-name: llvm
+            compiler-version: 13
+            cc: /usr/local/opt/llvm@13/bin/clang-13
+            cxx: /usr/local/opt/llvm@13/bin/clang++
+            extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
+
+          # MacOS GCC
+          - os: macos-latest
+            compiler-name: gcc
+            compiler-version: 7
+            cc: gcc-7
+            cxx: g++-7
+          - os: macos-latest
+            compiler-name: gcc
+            compiler-version: 8
+            cc: gcc-8
+            cxx: g++-8
+          - os: macos-latest
+            compiler-name: gcc
+            compiler-version: 9
+            cc: gcc-9
+            cxx: g++-9
+          - os: macos-latest
+            compiler-name: gcc
+            compiler-version: 10
+            cc: gcc-10
+            cxx: g++-10
+          - os: macos-latest
+            compiler-name: gcc
+            compiler-version: 11
+            cc: gcc-11
+            cxx: g++-11
+
+          # Ubuntu CLANG
+          - os: ubuntu-latest
+            compiler-name: llvm
+            compiler-version: 7
+            cc: clang-7
+            cxx: clang++-7
+          - os: ubuntu-latest
+            compiler-name: llvm
+            compiler-version: 8
+            cc: clang-8
+            cxx: clang++-8
+          - os: ubuntu-latest
+            compiler-name: llvm
+            compiler-version: 9
+            cc: clang-9
+            cxx: clang++-9
+          - os: ubuntu-latest
+            compiler-name: llvm
+            compiler-version: 10
+            cc: clang-10
+            cxx: clang++-10
+          - os: ubuntu-latest
+            compiler-name: llvm
+            compiler-version: 11
+            cc: clang-11
+            cxx: clang++-11
+          - os: ubuntu-latest
+            compiler-name: llvm
+            compiler-version: 12
+            cc: clang-12
+            cxx: clang++-12
+#          - os: ubuntu-latest
+#            compiler-name: llvm
+#            compiler-version: 13
+#            cc: clang-13
+#            cxx: clang++-13
+
+          # Ubuntu GCC
+          - os: ubuntu-latest
+            compiler-name: gcc
+            compiler-version: 7
+            cc: gcc-7
+            cxx: g++-7
+          - os: ubuntu-latest
+            compiler-name: gcc
+            compiler-version: 8
+            cc: gcc-8
+            cxx: g++-8
+          - os: ubuntu-latest
+            compiler-name: gcc
+            compiler-version: 9
+            cc: gcc-9
+            cxx: g++-9
+          - os: ubuntu-latest
+            compiler-name: gcc
+            compiler-version: 10
+            cc: gcc-10
+            cxx: g++-10
+          - os: ubuntu-latest
+            compiler-name: gcc
+            compiler-version: 11
+            cc: gcc-11
+            cxx: g++-11
+
+        # Exclude the "base cases"
+        exclude:
+          - os: macOS-latest
+            compiler-version: ''
+            compiler-name: ''
+            cc: ''
+            cxx: ''
+          - os: ubuntu-latest
+            compiler-version: ''
+            compiler-name: ''
+            cc: ''
+            cxx: ''
+
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Install LLVM on MacOS
+        if: ${{ matrix.os == 'macos-latest' && matrix.compiler-name == 'llvm' }}
+        run: brew install llvm@${{ matrix.compiler-version }}
 
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Install GCC on MacOS
+        if: ${{ matrix.os == 'macos-latest' && matrix.compiler-name == 'gcc' }}
+        run: brew install gcc@${{ matrix.compiler-version }}
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}} -V
-      
+      - name: Install LLVM on Ubuntu
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.compiler-name == 'llvm' }}
+        run: sudo apt-get install -y clang-${{ matrix.compiler-version }} libomp-${{ matrix.compiler-version }}-dev
+
+      - name: Install GCC on Ubuntu
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.compiler-name == 'gcc' }}
+        run: sudo apt-get install -y g++-${{ matrix.compiler-version }}
+
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${{ matrix.extra-cmake-arguments }}
+
+      - name: Build
+        # Build your program with the given configuration
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        # Execute tests defined by the CMake configuration.
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: ctest -C ${{env.BUILD_TYPE}} -V
