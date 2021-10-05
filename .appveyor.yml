@@ -1,6 +1,8 @@
 image:
+  - Visual Studio 2019
   - Visual Studio 2017
   - Visual Studio 2015
+  - Ubuntu2004
   - Ubuntu1804
   - Ubuntu1604
 
