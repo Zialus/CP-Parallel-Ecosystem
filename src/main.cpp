@@ -32,9 +32,7 @@ bool PRINT_TIME;
 bool PRINT_ALLGENS;
 int NTHREADS = -1;
 
-void
-printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, int GEN_PROC_FOXES, int GEN_FOOD_FOXES,
-                  FILE* file) {
+void printFinalResults(MatrixElement** matrix, FILE* file) {
     std::cout << "Printing solution to file... ";
 
     int counter = 0;
@@ -69,7 +67,7 @@ printFinalResults(MatrixElement** matrix, int R, int C, int GEN_PROC_RABBITS, in
     std::cout << "DONE!" << std::endl;
 }
 
-void printMatrix(MatrixElement** matrix, int R, int C) {
+void printMatrix(MatrixElement** matrix) {
 
     for (int i = 0; i < R + 2; ++i) {
         printf("-");
@@ -639,11 +637,11 @@ bool compare_files(const std::string& filename1, const std::string& filename2) {
     return range_equal(begin1, end, begin2, end);
 }
 
-void dealWithOutput(const char* expected_file) {
+void dealWithOutput() {
     const char* outfile = "tmp.txt";
     FILE* file = fopen(outfile, "w");
 
-    printFinalResults(posMatrix, R, C, GEN_PROC_RABBITS, GEN_PROC_FOXES, GEN_FOOD_FOXES, file);
+    printFinalResults(posMatrix, file);
 
     fclose(file);
 
@@ -670,7 +668,7 @@ int main(int argc, char* argv[]) {
     for (int gen = 0; gen < N_GEN; gen++) {
         if (PRINT_ALLGENS) {
             std::cout << "Generation " << gen << std::endl;
-            printMatrix(posMatrix, R, C);
+            printMatrix(posMatrix);
             std::cout << std::endl;
         }
         simGen(gen);
@@ -680,7 +678,7 @@ int main(int argc, char* argv[]) {
 
     if (PRINT_ALLGENS) {
         std::cout << "Generation " << N_GEN << std::endl;
-        printMatrix(posMatrix, R, C);
+        printMatrix(posMatrix);
         std::cout << std::endl;
     }
 
@@ -690,7 +688,7 @@ int main(int argc, char* argv[]) {
         printf("Operation took %d milliseconds\n", diff);
     }
 
-    dealWithOutput(expected_file);
+    dealWithOutput();
 
     freeEverything();
 
