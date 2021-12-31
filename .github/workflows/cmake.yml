@@ -24,19 +24,13 @@ jobs:
         cxx: [ '' ]
         include:
           # MacOS CLANG
-          - os: macos-latest
-            compiler-name: llvm
-            compiler-version: 7
-            cc: /usr/local/opt/llvm@7/bin/clang-7
-            cxx: /usr/local/opt/llvm@7/bin/clang++
-            extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
-          - os: macos-latest
+          - os: macos-10.15
             compiler-name: llvm
             compiler-version: 8
             cc: /usr/local/opt/llvm@8/bin/clang-8
             cxx: /usr/local/opt/llvm@8/bin/clang++
             extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
-          - os: macos-latest
+          - os: macos-10.15
             compiler-name: llvm
             compiler-version: 9
             cc: /usr/local/opt/llvm@9/bin/clang-9
@@ -69,12 +63,12 @@ jobs:
             extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
 
           # MacOS GCC
-          - os: macos-latest
+          - os: macos-10.15
             compiler-name: gcc
             compiler-version: 7
             cc: gcc-7
             cxx: g++-7
-          - os: macos-latest
+          - os: macos-10.15
             compiler-name: gcc
             compiler-version: 8
             cc: gcc-8
@@ -96,11 +90,6 @@ jobs:
             cxx: g++-11
 
           # Ubuntu CLANG
-          - os: ubuntu-latest
-            compiler-name: llvm
-            compiler-version: 7
-            cc: clang-7
-            cxx: clang++-7
           - os: ubuntu-latest
             compiler-name: llvm
             compiler-version: 8
@@ -183,19 +172,19 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install LLVM on MacOS
-        if: ${{ matrix.os == 'macos-latest' && matrix.compiler-name == 'llvm' }}
+        if: ${{ contains(matrix.os, 'macos') && matrix.compiler-name == 'llvm' }}
         run: brew install llvm@${{ matrix.compiler-version }}
 
       - name: Install GCC on MacOS
-        if: ${{ matrix.os == 'macos-latest' && matrix.compiler-name == 'gcc' }}
+        if: ${{ contains(matrix.os, 'macos') && matrix.compiler-name == 'gcc' }}
         run: brew install gcc@${{ matrix.compiler-version }}
 
       - name: Install LLVM on Ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.compiler-name == 'llvm' }}
+        if: ${{ contains(matrix.os, 'ubuntu') && matrix.compiler-name == 'llvm' }}
         run: sudo apt-get install -y clang-${{ matrix.compiler-version }} libomp-${{ matrix.compiler-version }}-dev
 
       - name: Install GCC on Ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.compiler-name == 'gcc' }}
+        if: ${{ contains(matrix.os, 'ubuntu') && matrix.compiler-name == 'gcc' }}
         run: sudo apt-get install -y g++-${{ matrix.compiler-version }}
 
       - name: Configure CMake
