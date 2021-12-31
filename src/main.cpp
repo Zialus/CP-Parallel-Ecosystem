@@ -132,7 +132,7 @@ std::pair<int, int> chooseMovePosition(int currentGen, int xPos, int yPos, std::
     perror("chooseMovePosition was used improperly");
     exit(1);
 
-};
+}
 
 void analyzeRabbits(int currentGen) {
 #pragma omp parallel for
@@ -592,7 +592,7 @@ void parse_arguments(int argc, char* argv[]) {
             if (freopen(argv[i + 1], "r", stdin) == nullptr) {
                 perror("freopen() failed");
                 exit(1);
-            };
+            }
             i++;
         } else if (strcmp(argv[i], "-v") == 0) {
             PRINT_ALLGENS = true;
