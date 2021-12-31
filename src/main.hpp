@@ -2,9 +2,9 @@
 
 #include <cstdio>
 
-typedef enum {
+enum class ElementType {
     RABBIT, FOX, ROCK, EMPTY
-} ElementType;
+};
 
 struct Rock {
 
@@ -70,15 +70,15 @@ struct MatrixElement {
         struct Rock rk;
     } elem;
 
-    char getChar() {
+    char getChar() const {
         switch (this->element_type) {
-            case RABBIT:
+            case ElementType::RABBIT:
                 return 'R';
-            case FOX:
+            case ElementType::FOX:
                 return 'F';
-            case ROCK:
+            case ElementType::ROCK:
                 return '*';
-            case EMPTY:
+            case ElementType::EMPTY:
                 return ' ';
         }
         return '?';
