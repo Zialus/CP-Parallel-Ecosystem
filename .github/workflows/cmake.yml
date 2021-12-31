@@ -5,6 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -41,6 +42,7 @@ jobs:
             cc: /usr/local/opt/llvm@9/bin/clang-9
             cxx: /usr/local/opt/llvm@9/bin/clang++
             extra-cmake-arguments: -DOpenMP_C_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_C_LIB_NAMES="omp" -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I/usr/local/opt/llvm/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY="/usr/local/opt/llvm/lib/libomp.dylib"
+          # FOR SOME REASON LLVM10 is not available
 #          - os: macos-latest
 #            compiler-name: llvm
 #            compiler-version: 10
@@ -124,6 +126,7 @@ jobs:
             compiler-version: 12
             cc: clang-12
             cxx: clang++-12
+          # FOR SOME REASON CLANG-13 is not available
 #          - os: ubuntu-latest
 #            compiler-name: llvm
 #            compiler-version: 13
