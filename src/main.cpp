@@ -112,7 +112,7 @@ std::vector<char> checkAdjacencies(MatrixElement** matrix, int X, int Y, Element
 }
 
 std::pair<int, int> chooseMovePosition(int currentGen, int xPos, int yPos, std::vector<char> posVal) {
-    int pos = (int) ((currentGen + xPos + yPos) % posVal.size());
+    size_t pos = ((size_t) (currentGen + xPos + yPos)) % posVal.size();
 
     if (posVal[pos] == 'N') {
         std::pair<int, int> posPair = std::make_pair(xPos - 1, yPos);
