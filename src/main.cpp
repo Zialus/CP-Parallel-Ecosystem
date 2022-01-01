@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <chrono>
 
 #include <cstring>
 #include <sys/timeb.h>
@@ -656,10 +657,7 @@ int main(int argc, char* argv[]) {
 
     read_input();
 
-    struct timeb start{};
-    struct timeb end{};
-
-    ftime(&start);
+    auto start = std::chrono::steady_clock::now();
 
     if (NTHREADS != -1) {
         omp_set_num_threads(NTHREADS);
@@ -674,7 +672,7 @@ int main(int argc, char* argv[]) {
         simGen(gen);
     }
 
-    ftime(&end);
+    auto end = std::chrono::steady_clock::now();
 
     if (PRINT_ALLGENS) {
         std::cout << "Generation " << N_GEN << std::endl;
@@ -682,10 +680,10 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
     }
 
-    int diff = (int) (1000.0 * (end.time - start.time) + (end.millitm - start.millitm));
+    auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
     if (PRINT_TIME) {
-        printf("Operation took %d milliseconds\n", diff);
+        printf("Operation took %lld milliseconds\n", diff.count());
     }
 
     dealWithOutput();
