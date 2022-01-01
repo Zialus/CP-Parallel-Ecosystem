@@ -85,7 +85,37 @@ struct MatrixElement {
     }
 };
 
-void prepareTempForRabbit();
-void prepareTempForFox();
+void printFinalResults(MatrixElement** matrix, FILE* file);
+
+void printMatrix(MatrixElement** matrix);
+
+std::vector<char> checkAdjacencies(MatrixElement** matrix, int X, int Y, ElementType type);
+
+std::pair<int, int> chooseMovePosition(int currentGen, int xPos, int yPos, std::vector<char> posVal);
+
+void analyzeRabbits(int currentGen);
+
+void analyzeFoxes(int currentGen);
+
+void simGen(int gen);
+
 void finalCopy();
+
+void prepareTempForRabbit();
+
+void prepareTempForFox();
+
+void print_help();
+
+void read_input();
+
+void parse_arguments(int argc, char* argv[]);
+
+template<typename InputIterator1, typename InputIterator2>
+bool range_equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2);
+
+bool compare_files(const std::string& filename1, const std::string& filename2);
+
+void dealWithOutput();
+
 void freeEverything();
