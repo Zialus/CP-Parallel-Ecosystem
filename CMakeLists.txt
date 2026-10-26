@@ -1,13 +1,13 @@
 ##### GENERAL CONFIG ZONE #####
 
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.21)
 project(cp-rabits-and-foxes)
 
 set(CMAKE_CXX_STANDARD 14)
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
-find_package(OpenMP REQUIRED)
+find_package(OpenMP REQUIRED COMPONENTS CXX)
 
 
 ##### EXECUTABLE ZONE #####
